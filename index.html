@@ -1,776 +1,934 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Telegram Clone</title>
-  <style>
-    /* Global Styles & Variables */
-    :root {
-      --tg-blue: #3390ec;
-      --tg-bg: #ffffff;
-      --tg-bg-secondary: #f4f4f5;
-      --tg-text: #000000;
-      --tg-text-secondary: #707579;
-      --tg-border: #e4e4e5;
-      --tg-msg-out: #eeff90;
-      --tg-msg-in: #ffffff;
-    }
-    
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    }
-    
-    body {
-      background-color: #e0e0e0;
-      color: var(--tg-text);
-      overflow: hidden;
-      height: 100vh;
-      width: 100vw;
-      display: flex;
-      justify-content: center;
-    }
-    
-    /* App Container (Mobile Constraint) */
-    #app {
-      width: 100%;
-      max-width: 600px;
-      height: 100%;
-      background: var(--tg-bg);
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    }
-    
-    /* View Navigation */
-    .view {
-      display: none;
-      flex-direction: column;
-      height: 100%;
-      width: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      background: var(--tg-bg);
-      z-index: 1;
-    }
-    .view.active {
-      display: flex;
-    }
-    
-    /* Common Header */
-    .header {
-      background: var(--tg-blue);
-      color: white;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      padding: 0 16px;
-      flex-shrink: 0;
-      justify-content: space-between;
-      font-size: 18px;
-      font-weight: 500;
-      z-index: 10;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-    }
-    .header .icon-btn {
-      color: white;
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      padding: 8px;
-      margin: -8px;
-    }
-    
-    /* --- Login / Register View --- */
-    #login-view {
-      padding: 24px;
-      align-items: center;
-      justify-content: center;
-      background: var(--tg-bg-secondary);
-    }
-    .auth-card {
-      background: white;
-      padding: 24px;
-      border-radius: 12px;
-      width: 100%;
-      max-width: 320px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-    .auth-card h2 {
-      text-align: center;
-      margin-bottom: 24px;
-      color: var(--tg-blue);
-    }
-    .input-group {
-      margin-bottom: 16px;
-    }
-    .input-group label {
-      display: block;
-      font-size: 13px;
-      margin-bottom: 6px;
-      color: var(--tg-text-secondary);
-    }
-    .input-group input {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid var(--tg-border);
-      border-radius: 8px;
-      font-size: 16px;
-      outline: none;
-    }
-    .input-group input:focus {
-      border-color: var(--tg-blue);
-    }
-    .btn {
-      width: 100%;
-      padding: 14px;
-      background: var(--tg-blue);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .btn:active {
-      opacity: 0.8;
-    }
-    .auth-switch {
-      text-align: center;
-      margin-top: 16px;
-      font-size: 14px;
-      color: var(--tg-blue);
-      cursor: pointer;
-    }
-    
-    /* --- Chat List View --- */
-    .chat-list {
-      flex: 1;
-      overflow-y: auto;
-      background: white;
-    }
-    .chat-item {
-      display: flex;
-      align-items: center;
-      padding: 10px 16px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .chat-item:active {
-      background: var(--tg-bg-secondary);
-    }
-    .avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #3390ec, #287bc6);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      font-weight: bold;
-      margin-right: 14px;
-      flex-shrink: 0;
-    }
-    .chat-info {
-      flex: 1;
-      min-width: 0;
-      border-bottom: 1px solid var(--tg-border);
-      padding-bottom: 12px;
-      padding-top: 2px;
-    }
-    .chat-item:last-child .chat-info {
-      border-bottom: none;
-    }
-    .chat-header-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 4px;
-    }
-    .chat-name {
-      font-weight: 500;
-      font-size: 16px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .chat-time {
-      font-size: 12px;
-      color: var(--tg-text-secondary);
-    }
-    .chat-last-msg {
-      font-size: 14px;
-      color: var(--tg-text-secondary);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    .fab {
-      position: absolute;
-      bottom: 24px;
-      right: 24px;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: var(--tg-blue);
-      color: white;
-      border: none;
-      font-size: 24px;
-      box-shadow: 0 4px 12px rgba(51, 144, 236, 0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 10;
-    }
-    .fab:active {
-      transform: scale(0.95);
-    }
-    
-    /* --- Chat Room View --- */
-    #chat-room-view {
-      /* Telegram default doodle background mock */
-      background: #E4EBE0 url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M10 10 h 10 v 10 h -10 z" fill="rgba(0,0,0,0.03)"/></svg>');
-    }
-    .messages-area {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .msg {
-      max-width: 75%;
-      padding: 8px 12px;
-      border-radius: 12px;
-      font-size: 15px;
-      line-height: 1.4;
-      position: relative;
-      word-break: break-word;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-    }
-    .msg-out {
-      background: var(--tg-msg-out);
-      align-self: flex-end;
-      border-bottom-right-radius: 4px;
-    }
-    .msg-in {
-      background: var(--tg-msg-in);
-      align-self: flex-start;
-      border-bottom-left-radius: 4px;
-    }
-    .msg-time {
-      font-size: 11px;
-      color: rgba(0,0,0,0.4);
-      float: right;
-      margin: 6px 0 -4px 12px;
-      line-height: 1;
-    }
-    
-    /* Input Area */
-    .input-area {
-      background: var(--tg-bg);
-      padding: 8px 16px;
-      display: flex;
-      align-items: flex-end;
-      gap: 12px;
-      border-top: 1px solid var(--tg-border);
-    }
-    .input-wrapper {
-      flex: 1;
-      background: var(--tg-bg-secondary);
-      border-radius: 20px;
-      padding: 8px 16px;
-      display: flex;
-      align-items: center;
-      min-height: 40px;
-    }
-    #msg-input {
-      width: 100%;
-      border: none;
-      background: transparent;
-      font-size: 16px;
-      outline: none;
-      max-height: 100px;
-      resize: none;
-    }
-    .send-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: var(--tg-blue);
-      color: white;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    .send-btn:active {
-      transform: scale(0.9);
-    }
-    .send-btn svg {
-      width: 18px;
-      height: 18px;
-      fill: currentColor;
-      margin-left: -2px;
-    }
-    
-    /* --- Settings View --- */
-    .settings-list {
-      padding: 16px 0;
-      background: var(--tg-bg-secondary);
-      flex: 1;
-      overflow-y: auto;
-    }
-    .settings-group {
-      background: white;
-      margin-bottom: 16px;
-      padding: 0 16px;
-      border-top: 1px solid var(--tg-border);
-      border-bottom: 1px solid var(--tg-border);
-    }
-    .settings-item {
-      padding: 12px 0;
-      border-bottom: 1px solid var(--tg-border);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .settings-item:last-child {
-      border-bottom: none;
-    }
-    .settings-label {
-      font-size: 13px;
-      color: var(--tg-blue);
-    }
-    .settings-value {
-      font-size: 16px;
-    }
-    .settings-input {
-      width: 100%;
-      border: none;
-      font-size: 16px;
-      outline: none;
-      background: transparent;
-      color: var(--tg-text);
-    }
-    .settings-value.readonly {
-      color: var(--tg-text-secondary);
-    }
-    .logout-btn {
-      background: white;
-      color: #ff3b30;
-      text-align: center;
-      padding: 16px;
-      cursor: pointer;
-      border-top: 1px solid var(--tg-border);
-      border-bottom: 1px solid var(--tg-border);
-      font-size: 16px;
-    }
-    .logout-btn:active {
-      background: #fafafa;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Telegram</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --tg-blue: #2AABEE;
+    --tg-blue-dark: #1e96d4;
+    --tg-blue-light: #e8f4fd;
+    --tg-bg: #ffffff;
+    --tg-surface: #f4f4f5;
+    --tg-border: #e4e4e7;
+    --tg-text: #1a1a1a;
+    --tg-text-secondary: #71717a;
+    --tg-msg-out: #effdde;
+    --tg-msg-in: #ffffff;
+    --radius: 18px;
+    --header-h: 56px;
+    --footer-h: 64px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--tg-bg);
+    color: var(--tg-text);
+    height: 100dvh;
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+  }
+
+  /* ──────── SCREEN SYSTEM ──────── */
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--tg-bg);
+    transition: transform 0.28s cubic-bezier(.4,0,.2,1), opacity 0.28s;
+    will-change: transform;
+  }
+  .screen.hidden { transform: translateX(100%); pointer-events: none; opacity: 0; }
+
+  /* ──────── AUTH SCREEN ──────── */
+  #screen-auth {
+    background: linear-gradient(160deg, #1e96d4 0%, #2AABEE 45%, #54c5f8 100%);
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .auth-hero {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: max(60px, 10vh);
+    padding-bottom: 20px;
+    animation: fadeDown 0.6s ease both;
+  }
+  .auth-logo {
+    width: 88px; height: 88px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.3);
+  }
+  .auth-logo svg { width: 48px; height: 48px; }
+  .auth-hero h1 { color: white; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+  .auth-hero p { color: rgba(255,255,255,0.8); font-size: 14px; margin-top: 4px; }
+
+  .auth-card {
+    background: white;
+    border-radius: 24px 24px 0 0;
+    padding: 28px 24px max(40px, env(safe-area-inset-bottom));
+    width: 100%;
+    max-width: 480px;
+    animation: slideUp 0.5s ease both 0.1s;
+    box-shadow: 0 -8px 40px rgba(0,0,0,0.12);
+    max-height: 72vh;
+    overflow-y: auto;
+  }
+  .auth-tabs {
+    display: flex;
+    background: var(--tg-surface);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 24px;
+  }
+  .auth-tab {
+    flex: 1; padding: 10px;
+    border: none; background: transparent;
+    border-radius: 9px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px; font-weight: 600;
+    color: var(--tg-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .auth-tab.active {
+    background: white;
+    color: var(--tg-blue);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .auth-form { display: flex; flex-direction: column; gap: 14px; }
+  .auth-form.hidden { display: none; }
+
+  .input-group { position: relative; }
+  .input-group label {
+    display: block;
+    font-size: 12px; font-weight: 600;
+    color: var(--tg-text-secondary);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .input-group input {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1.5px solid var(--tg-border);
+    border-radius: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    color: var(--tg-text);
+    background: var(--tg-bg);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .input-group input:focus { border-color: var(--tg-blue); box-shadow: 0 0 0 3px rgba(42,171,238,0.15); }
+  .input-group input[readonly] { background: var(--tg-surface); color: var(--tg-text-secondary); }
+
+  .btn-primary {
+    padding: 14px;
+    background: var(--tg-blue);
+    color: white; border: none;
+    border-radius: 13px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px; font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    margin-top: 4px;
+  }
+  .btn-primary:active { transform: scale(0.98); background: var(--tg-blue-dark); }
+  .auth-error { font-size: 13px; color: #ef4444; text-align: center; min-height: 18px; font-weight: 500; }
+
+  /* ──────── HEADER ──────── */
+  .app-header {
+    height: var(--header-h);
+    background: var(--tg-blue);
+    display: flex; align-items: center;
+    padding: 0 8px 0 4px; gap: 4px;
+    flex-shrink: 0;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.15);
+    z-index: 10;
+  }
+  .header-btn {
+    width: 44px; height: 44px;
+    background: transparent; border: none; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: background 0.15s; color: white; flex-shrink: 0;
+  }
+  .header-btn:active { background: rgba(255,255,255,0.2); }
+  .header-btn svg { width: 22px; height: 22px; }
+  .header-title { flex: 1; font-size: 18px; font-weight: 700; color: white; letter-spacing: -0.3px; }
+  .header-title.small { font-size: 15px; font-weight: 600; }
+  .header-subtitle { font-size: 12px; color: rgba(255,255,255,0.75); font-weight: 400; }
+  .header-info { flex: 1; display: flex; flex-direction: column; gap: 1px; }
+  .header-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: white; flex-shrink: 0; margin-right: 8px;
+  }
+
+  /* ──────── CHAT LIST ──────── */
+  #screen-list .body { flex: 1; overflow-y: auto; }
+  .search-bar { padding: 8px 12px; background: var(--tg-bg); border-bottom: 1px solid var(--tg-border); }
+  .search-bar input {
+    width: 100%; padding: 9px 16px 9px 38px;
+    background: var(--tg-surface); border: none; border-radius: 20px;
+    font-family: 'Inter', sans-serif; font-size: 14px; color: var(--tg-text); outline: none;
+  }
+  .search-bar-wrap { position: relative; }
+  .search-bar-wrap svg {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    color: var(--tg-text-secondary); width: 18px; height: 18px; pointer-events: none;
+  }
+  .chat-item {
+    display: flex; align-items: center;
+    padding: 10px 16px; gap: 12px;
+    cursor: pointer; transition: background 0.15s;
+    border-bottom: 1px solid var(--tg-border);
+  }
+  .chat-item:active { background: var(--tg-surface); }
+  .avatar {
+    width: 52px; height: 52px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 19px; font-weight: 700; color: white; flex-shrink: 0;
+  }
+  .avatar.small { width: 36px; height: 36px; font-size: 14px; }
+  .chat-info { flex: 1; min-width: 0; }
+  .chat-name-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .chat-name { font-size: 15px; font-weight: 600; color: var(--tg-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chat-time { font-size: 12px; color: var(--tg-text-secondary); flex-shrink: 0; }
+  .chat-preview { font-size: 13px; color: var(--tg-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 3px; }
+  .chat-preview .you { color: var(--tg-blue); font-weight: 500; }
+  .empty-state {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 60%; gap: 12px; color: var(--tg-text-secondary); padding: 24px; text-align: center;
+  }
+  .empty-state svg { width: 64px; height: 64px; opacity: 0.3; }
+  .empty-state p { font-size: 14px; }
+
+  /* ──────── CHAT ROOM ──────── */
+  #screen-chat .body {
+    flex: 1; overflow-y: auto;
+    padding: 12px 10px;
+    display: flex; flex-direction: column; gap: 3px;
+    background-color: #efeae2;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ccircle cx='40' cy='40' r='2' fill='%232aabee' fill-opacity='0.07'/%3E%3Ccircle cx='10' cy='10' r='1.5' fill='%232aabee' fill-opacity='0.05'/%3E%3Ccircle cx='70' cy='70' r='1.5' fill='%232aabee' fill-opacity='0.05'/%3E%3C/svg%3E");
+  }
+  .msg-wrapper { display: flex; flex-direction: column; max-width: 75%; animation: msgIn 0.2s ease both; }
+  .msg-wrapper.out { align-self: flex-end; align-items: flex-end; }
+  .msg-wrapper.in { align-self: flex-start; align-items: flex-start; }
+  .msg-bubble {
+    padding: 8px 12px; border-radius: 16px;
+    font-size: 14px; line-height: 1.5;
+    position: relative; word-break: break-word;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+  .msg-wrapper.out .msg-bubble { background: var(--tg-msg-out); border-bottom-right-radius: 4px; color: var(--tg-text); }
+  .msg-wrapper.in .msg-bubble { background: var(--tg-msg-in); border-bottom-left-radius: 4px; color: var(--tg-text); }
+  .msg-meta {
+    display: flex; align-items: center; gap: 3px;
+    font-size: 11px; color: var(--tg-text-secondary);
+    margin-top: 2px; padding: 0 4px;
+  }
+  .msg-wrapper.out .msg-meta { flex-direction: row-reverse; }
+  .check-icon { width: 14px; height: 14px; color: var(--tg-blue); }
+  .date-divider {
+    align-self: center;
+    background: rgba(0,0,0,0.3);
+    color: white; font-size: 12px; font-weight: 500;
+    padding: 4px 12px; border-radius: 12px; margin: 8px 0;
+  }
+
+  /* ──────── MESSAGE INPUT ──────── */
+  .chat-footer {
+    min-height: var(--footer-h);
+    background: var(--tg-bg);
+    display: flex; align-items: center;
+    padding: 8px 8px 8px 12px; gap: 8px; flex-shrink: 0;
+    border-top: 1px solid var(--tg-border);
+  }
+  .msg-input-wrap { flex: 1; }
+  .msg-input {
+    width: 100%; padding: 10px 16px;
+    background: var(--tg-surface); border: 1.5px solid transparent;
+    border-radius: 22px; font-family: 'Inter', sans-serif;
+    font-size: 15px; color: var(--tg-text); outline: none;
+    transition: border-color 0.2s; resize: none;
+  }
+  .msg-input:focus { border-color: var(--tg-blue); }
+  .send-btn {
+    width: 44px; height: 44px; background: var(--tg-blue);
+    border: none; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: background 0.2s, transform 0.15s; flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(42,171,238,0.4);
+  }
+  .send-btn:active { transform: scale(0.92); background: var(--tg-blue-dark); }
+  .send-btn svg { width: 20px; height: 20px; color: white; }
+
+  /* ──────── SETTINGS ──────── */
+  #screen-settings .body { flex: 1; overflow-y: auto; }
+  .settings-profile {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 32px 24px 24px;
+    background: linear-gradient(180deg, var(--tg-blue-light) 0%, white 100%);
+    border-bottom: 1px solid var(--tg-border); gap: 8px;
+  }
+  .settings-avatar {
+    width: 80px; height: 80px; border-radius: 50%;
+    font-size: 30px; font-weight: 700; color: white;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15); margin-bottom: 4px;
+  }
+  .settings-name { font-size: 20px; font-weight: 700; color: var(--tg-text); }
+  .settings-username { font-size: 14px; color: var(--tg-text-secondary); }
+  .settings-section { padding: 20px 16px 8px; }
+  .settings-section-title {
+    font-size: 12px; font-weight: 700; color: var(--tg-blue);
+    text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; padding: 0 4px;
+  }
+  .settings-card { background: var(--tg-bg); border-radius: 14px; border: 1px solid var(--tg-border); overflow: hidden; }
+  .settings-row {
+    display: flex; align-items: center;
+    padding: 14px 16px; gap: 12px; border-bottom: 1px solid var(--tg-border);
+  }
+  .settings-row:last-child { border-bottom: none; }
+  .settings-row-icon {
+    width: 34px; height: 34px; background: var(--tg-blue-light);
+    border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .settings-row-icon svg { width: 18px; height: 18px; color: var(--tg-blue); }
+  .settings-row-body { flex: 1; min-width: 0; }
+  .settings-row-label { font-size: 12px; font-weight: 600; color: var(--tg-text-secondary); text-transform: uppercase; letter-spacing: 0.4px; }
+  .settings-row-value { font-size: 15px; color: var(--tg-text-secondary); margin-top: 2px; }
+  .settings-row-input {
+    width: 100%; border: none; background: transparent;
+    font-family: 'Inter', sans-serif; font-size: 15px; color: var(--tg-text); outline: none; margin-top: 2px;
+  }
+  .settings-save-btn { margin: 16px 16px 8px; width: calc(100% - 32px); }
+  .settings-logout-btn {
+    margin: 4px 16px 32px; width: calc(100% - 32px);
+    padding: 14px; background: #fee2e2; color: #ef4444;
+    border: none; border-radius: 13px; font-family: 'Inter', sans-serif;
+    font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+  }
+  .settings-logout-btn:active { background: #fecaca; }
+
+  /* ──────── MODAL ──────── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5); z-index: 100;
+    display: flex; align-items: flex-end;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal-sheet {
+    width: 100%; background: white; border-radius: 20px 20px 0 0;
+    padding: 16px; max-height: 70vh; display: flex; flex-direction: column;
+    transform: translateY(100%); transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+  }
+  .modal-overlay.open .modal-sheet { transform: translateY(0); }
+  .modal-handle { width: 36px; height: 4px; background: var(--tg-border); border-radius: 2px; margin: 0 auto 16px; }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 14px; }
+  .modal-results { flex: 1; overflow-y: auto; }
+  .user-result {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 4px; cursor: pointer; border-bottom: 1px solid var(--tg-border);
+    transition: background 0.15s; border-radius: 10px;
+  }
+  .user-result:active { background: var(--tg-surface); }
+  .user-result-info { flex: 1; }
+  .user-result-name { font-size: 15px; font-weight: 600; }
+  .user-result-username { font-size: 13px; color: var(--tg-text-secondary); }
+
+  /* ──────── TOAST ──────── */
+  .toast {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px;
+    font-size: 13px; font-weight: 500; z-index: 999; opacity: 0;
+    transition: all 0.3s; white-space: nowrap; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ──────── ANIMATIONS ──────── */
+  @keyframes fadeDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes msgIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-thumb { background: var(--tg-border); border-radius: 2px; }
+</style>
 </head>
 <body>
 
-<div id="app">
-  
-  <div id="login-view" class="view">
-    <div class="auth-card">
-      <h2 id="auth-title">Welcome to Telegram</h2>
-      <form id="auth-form">
-        <div class="input-group" id="display-name-group">
-          <label>Display Name (Nickname)</label>
-          <input type="text" id="reg-display" placeholder="e.g. John Doe">
-        </div>
-        <div class="input-group">
-          <label>Username (Unique ID)</label>
-          <input type="text" id="reg-username" placeholder="e.g. johndoe123" required>
-        </div>
-        <div class="input-group">
-          <label>Password</label>
-          <input type="password" id="reg-password" placeholder="Password" required>
-        </div>
-        <button type="submit" class="btn" id="auth-submit">Sign Up</button>
-      </form>
-      <div class="auth-switch" id="auth-switch">Already have an account? Log in</div>
+<!-- ═══ AUTH ═══ -->
+<div id="screen-auth" class="screen">
+  <div class="auth-hero">
+    <div class="auth-logo">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M22 2L11 13" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h1>Telegram</h1>
+    <p>Fast. Secure. Powerful.</p>
+  </div>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Create Account</button>
+    </div>
+    <div id="form-login" class="auth-form">
+      <div class="input-group">
+        <label>Username</label>
+        <input type="text" id="login-username" placeholder="@username" autocomplete="username">
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <div class="auth-error" id="login-error"></div>
+      <button class="btn-primary" onclick="doLogin()">Sign In</button>
+      <p style="font-size:12px;color:var(--tg-text-secondary);text-align:center;margin-top:8px">Demo: username <b>alice</b> / password <b>password123</b></p>
+    </div>
+    <div id="form-register" class="auth-form hidden">
+      <div class="input-group">
+        <label>Display Name</label>
+        <input type="text" id="reg-displayname" placeholder="Your name (shown in chats)">
+      </div>
+      <div class="input-group">
+        <label>Username (permanent login ID)</label>
+        <input type="text" id="reg-username" placeholder="e.g. john_doe (cannot change)">
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="reg-password" placeholder="Minimum 6 characters" autocomplete="new-password">
+      </div>
+      <div class="auth-error" id="reg-error"></div>
+      <button class="btn-primary" onclick="doRegister()">Create Account</button>
     </div>
   </div>
-
-  <div id="chat-list-view" class="view">
-    <div class="header">
-      <div>
-        <button class="icon-btn" id="settings-btn" style="margin-right: 16px;">☰</button>
-        Telegram
-      </div>
-      <button class="icon-btn">🔍</button>
-    </div>
-    <div class="chat-list" id="chat-list-container">
-      </div>
-    <button class="fab">✎</button>
-  </div>
-
-  <div id="chat-room-view" class="view">
-    <div class="header">
-      <button class="icon-btn" id="chat-back-btn">←</button>
-      <div id="chat-room-name" style="flex:1; margin-left: 16px;">Contact Name</div>
-      <button class="icon-btn">⋮</button>
-    </div>
-    <div class="messages-area" id="messages-container">
-      </div>
-    <div class="input-area">
-      <button class="icon-btn" style="color: var(--tg-text-secondary); margin-bottom: 8px;">📎</button>
-      <div class="input-wrapper">
-        <input type="text" id="msg-input" placeholder="Message" autocomplete="off">
-      </div>
-      <button class="send-btn" id="send-msg-btn">
-        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-      </button>
-    </div>
-  </div>
-
-  <div id="settings-view" class="view">
-    <div class="header">
-      <button class="icon-btn" id="settings-back-btn">←</button>
-      <div style="flex:1; margin-left: 16px;">Settings</div>
-      <button class="icon-btn" id="settings-save-btn">✓</button>
-    </div>
-    <div class="settings-list">
-      <div style="text-align: center; padding: 20px 0;">
-        <div class="avatar" id="settings-avatar" style="width: 80px; height: 80px; font-size: 32px; margin: 0 auto 10px auto;">U</div>
-        <h3 id="settings-name-display" style="font-weight: 500;">Display Name</h3>
-      </div>
-      
-      <div class="settings-group">
-        <div class="settings-item">
-          <div class="settings-label">Account ID / Login</div>
-          <div class="settings-value readonly" id="settings-username">@username</div>
-        </div>
-        <div class="settings-item">
-          <div class="settings-label">Display Name</div>
-          <input type="text" class="settings-input" id="settings-display-input">
-        </div>
-      </div>
-      
-      <div class="logout-btn" id="logout-btn">Log Out</div>
-    </div>
-  </div>
-
 </div>
 
-<script>
-  // --- DATABASE (LocalStorage) ---
-  const DB = {
-    getUsers() {
-      return JSON.parse(localStorage.getItem('tg_users') || '{}');
-    },
-    saveUsers(users) {
-      localStorage.setItem('tg_users', JSON.stringify(users));
-    },
-    getMessages() {
-      return JSON.parse(localStorage.getItem('tg_msgs') || '{}');
-    },
-    saveMessages(msgs) {
-      localStorage.setItem('tg_msgs', JSON.stringify(msgs));
-    }
-  };
+<!-- ═══ CHAT LIST ═══ -->
+<div id="screen-list" class="screen hidden">
+  <div class="app-header">
+    <div class="header-title">Telegram</div>
+    <button class="header-btn" onclick="openNewChatModal()" title="Find user">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    </button>
+    <button class="header-btn" onclick="showSettings()" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
+  </div>
+  <div class="search-bar">
+    <div class="search-bar-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" placeholder="Search chats..." oninput="filterChats(this.value)">
+    </div>
+  </div>
+  <div class="body" id="chat-list-body"></div>
+</div>
 
-  // --- STATE ---
-  let isLoginMode = false;
-  let currentUser = JSON.parse(localStorage.getItem('tg_currentUser') || 'null');
-  let currentChatId = null;
+<!-- ═══ CHAT ROOM ═══ -->
+<div id="screen-chat" class="screen hidden">
+  <div class="app-header">
+    <button class="header-btn" onclick="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </button>
+    <div id="chat-header-avatar" class="header-avatar"></div>
+    <div class="header-info">
+      <div id="chat-header-name" class="header-title small"></div>
+      <div id="chat-header-status" class="header-subtitle"></div>
+    </div>
+    <button class="header-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
+      </svg>
+    </button>
+  </div>
+  <div class="body" id="messages-body"></div>
+  <div class="chat-footer">
+    <div class="msg-input-wrap">
+      <input type="text" class="msg-input" id="msg-input" placeholder="Message…" onkeydown="handleMsgKey(event)">
+    </div>
+    <button class="send-btn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"/>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    </button>
+  </div>
+</div>
 
-  // Mock initial bot contacts
-  const BOT_CONTACTS = [
-    { id: 'alice_bot', display: 'Alice (Bot)', lastMsg: 'Hey! Send me a message.' },
-    { id: 'bob_bot', display: 'Bob (Bot)', lastMsg: 'Let me know if you need anything!' },
-    { id: 'news_bot', display: 'Telegram News', lastMsg: 'Welcome to your Telegram clone.' }
-  ];
-
-  // --- DOM ELEMENTS ---
-  const els = {
-    authForm: document.getElementById('auth-form'),
-    authTitle: document.getElementById('auth-title'),
-    authSwitch: document.getElementById('auth-switch'),
-    authSubmit: document.getElementById('auth-submit'),
-    displayNameGroup: document.getElementById('display-name-group'),
-    regDisplay: document.getElementById('reg-display'),
-    regUsername: document.getElementById('reg-username'),
-    regPassword: document.getElementById('reg-password'),
-    
-    chatListContainer: document.getElementById('chat-list-container'),
-    settingsBtn: document.getElementById('settings-btn'),
-    
-    chatRoomName: document.getElementById('chat-room-name'),
-    chatBackBtn: document.getElementById('chat-back-btn'),
-    messagesContainer: document.getElementById('messages-container'),
-    msgInput: document.getElementById('msg-input'),
-    sendMsgBtn: document.getElementById('send-msg-btn'),
-    
-    settingsBackBtn: document.getElementById('settings-back-btn'),
-    settingsSaveBtn: document.getElementById('settings-save-btn'),
-    settingsAvatar: document.getElementById('settings-avatar'),
-    settingsNameDisplay: document.getElementById('settings-name-display'),
-    settingsUsername: document.getElementById('settings-username'),
-    settingsDisplayInput: document.getElementById('settings-display-input'),
-    logoutBtn: document.getElementById('logout-btn')
-  };
-
-  // --- ROUTING ---
-  function switchView(viewId) {
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById(viewId).classList.add('active');
-  }
-
-  function init() {
-    if (currentUser) {
-      showChatList();
-    } else {
-      switchView('login-view');
-      renderAuthForm();
-    }
-  }
-
-  // --- AUTHENTICATION ---
-  function renderAuthForm() {
-    if (isLoginMode) {
-      els.authTitle.textContent = 'Log in to Telegram';
-      els.displayNameGroup.style.display = 'none';
-      els.regDisplay.required = false;
-      els.authSubmit.textContent = 'Log In';
-      els.authSwitch.textContent = "Don't have an account? Sign up";
-    } else {
-      els.authTitle.textContent = 'Welcome to Telegram';
-      els.displayNameGroup.style.display = 'block';
-      els.regDisplay.required = true;
-      els.authSubmit.textContent = 'Sign Up';
-      els.authSwitch.textContent = 'Already have an account? Log in';
-    }
-  }
-
-  els.authSwitch.addEventListener('click', () => {
-    isLoginMode = !isLoginMode;
-    renderAuthForm();
-  });
-
-  els.authForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const username = els.regUsername.value.trim().toLowerCase();
-    const password = els.regPassword.value;
-    const display = els.regDisplay.value.trim();
-
-    const users = DB.getUsers();
-
-    if (isLoginMode) {
-      const user = users[username];
-      if (user && user.password === password) {
-        currentUser = { username, display: user.display };
-        localStorage.setItem('tg_currentUser', JSON.stringify(currentUser));
-        showChatList();
-        els.regPassword.value = '';
-      } else {
-        alert('Invalid username or password');
-      }
-    } else {
-      if (users[username]) {
-        alert('Username already exists. Please choose another.');
-      } else {
-        users[username] = { username, password, display };
-        DB.saveUsers(users);
-        currentUser = { username, display };
-        localStorage.setItem('tg_currentUser', JSON.stringify(currentUser));
-        showChatList();
-        els.regPassword.value = '';
-      }
-    }
-  });
-
-  // --- MAIN CHAT LIST ---
-  function showChatList() {
-    switchView('chat-list-view');
-    renderChatList();
-  }
-
-  function renderChatList() {
-    els.chatListContainer.innerHTML = '';
-    const allMsgs = DB.getMessages();
-
-    BOT_CONTACTS.forEach(contact => {
-      const msgs = allMsgs[contact.id] || [];
-      
-      let lastMsgText = contact.lastMsg;
-      let time = '12:00 PM';
-      
-      if (msgs.length > 0) {
-        const lastMsg = msgs[msgs.length - 1];
-        lastMsgText = lastMsg.text;
-        time = lastMsg.time;
-      }
-      
-      const el = document.createElement('div');
-      el.className = 'chat-item';
-      
-      // Prevent HTML injection for security best practices
-      el.innerHTML = `
-        <div class="avatar">${contact.display.charAt(0).toUpperCase()}</div>
-        <div class="chat-info">
-          <div class="chat-header-row">
-            <div class="chat-name"></div>
-            <div class="chat-time">${time}</div>
+<!-- ═══ SETTINGS ═══ -->
+<div id="screen-settings" class="screen hidden">
+  <div class="app-header">
+    <button class="header-btn" onclick="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </button>
+    <div class="header-title">Settings</div>
+  </div>
+  <div class="body">
+    <div class="settings-profile">
+      <div class="settings-avatar" id="settings-avatar"></div>
+      <div class="settings-name" id="settings-disp-name"></div>
+      <div class="settings-username" id="settings-disp-username"></div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">Account</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-row-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
           </div>
-          <div class="chat-last-msg"></div>
+          <div class="settings-row-body">
+            <div class="settings-row-label">Account ID / Login</div>
+            <div class="settings-row-value" id="settings-username-readonly"></div>
+          </div>
         </div>
-      `;
-      
-      // Inject text content safely
-      el.querySelector('.chat-name').textContent = contact.display;
-      el.querySelector('.chat-last-msg').textContent = lastMsgText;
-      
-      el.addEventListener('click', () => openChat(contact));
-      els.chatListContainer.appendChild(el);
+        <div class="settings-row">
+          <div class="settings-row-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+            </svg>
+          </div>
+          <div class="settings-row-body">
+            <div class="settings-row-label">Display Name</div>
+            <input class="settings-row-input" id="settings-name-input" type="text" placeholder="Enter display name">
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary settings-save-btn" onclick="saveProfile()">Save Changes</button>
+    <button class="settings-logout-btn" onclick="doLogout()">Log Out</button>
+  </div>
+</div>
+
+<!-- ═══ NEW CHAT MODAL ═══ -->
+<div class="modal-overlay" id="new-chat-modal" onclick="handleModalClick(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">New Chat</div>
+    <div class="search-bar" style="padding: 0 0 12px;">
+      <div class="search-bar-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" id="user-search-input" placeholder="Search by username or name…" oninput="searchUsers(this.value)">
+      </div>
+    </div>
+    <div class="modal-results" id="user-search-results">
+      <div style="padding:16px 4px;font-size:13px;color:var(--tg-text-secondary);">Start typing to find users</div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════
+//  DATABASE
+// ══════════════════════════════
+const DB = {
+  getUsers() { return JSON.parse(localStorage.getItem('tg_users') || '{}'); },
+  saveUsers(u) { localStorage.setItem('tg_users', JSON.stringify(u)); },
+  getMessages() { return JSON.parse(localStorage.getItem('tg_messages') || '{}'); },
+  saveMessages(m) { localStorage.setItem('tg_messages', JSON.stringify(m)); },
+  getSession() { return localStorage.getItem('tg_session'); },
+  setSession(u) { localStorage.setItem('tg_session', u); },
+  clearSession() { localStorage.removeItem('tg_session'); },
+  getConversations(u) { return JSON.parse(localStorage.getItem('tg_convos_' + u) || '[]'); },
+  saveConversations(u, list) { localStorage.setItem('tg_convos_' + u, JSON.stringify(list)); },
+
+  getUserByUsername(username) {
+    return this.getUsers()[username.toLowerCase()] || null;
+  },
+  createUser(displayName, username, password) {
+    const users = this.getUsers();
+    const key = username.toLowerCase();
+    if (users[key]) return false;
+    users[key] = { displayName, username: key, password, createdAt: Date.now(), color: randomColor() };
+    this.saveUsers(users);
+    return true;
+  },
+  updateDisplayName(username, newName) {
+    const users = this.getUsers();
+    const key = username.toLowerCase();
+    if (!users[key]) return false;
+    users[key].displayName = newName;
+    this.saveUsers(users);
+    return true;
+  },
+  getChatKey(a, b) { return [a, b].sort().join('::'); },
+  getChat(a, b) { return (this.getMessages()[this.getChatKey(a, b)] || []); },
+  addMessage(from, to, text) {
+    const msgs = this.getMessages();
+    const key = this.getChatKey(from, to);
+    if (!msgs[key]) msgs[key] = [];
+    const msg = { id: Date.now() + Math.random(), from, to, text, ts: Date.now() };
+    msgs[key].push(msg);
+    this.saveMessages(msgs);
+    [from, to].forEach(user => {
+      const other = user === from ? to : from;
+      let convos = this.getConversations(user).filter(c => c !== other);
+      convos.unshift(other);
+      this.saveConversations(user, convos);
+    });
+    return msg;
+  }
+};
+
+// ══════════════════════════════
+//  STATE & HELPERS
+// ══════════════════════════════
+let currentUser = null;
+let currentChatWith = null;
+let screenHistory = [];
+
+const COLORS = ['#E91E63','#9C27B0','#673AB7','#3F51B5','#2196F3','#009688','#4CAF50','#FF9800','#FF5722','#795548'];
+function randomColor() { return COLORS[Math.floor(Math.random() * COLORS.length)]; }
+function getInitials(name) { return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?'; }
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatTime(ts) {
+  const d = new Date(ts), now = new Date();
+  if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  const diff = now - d;
+  if (diff < 172800000) return 'Yesterday';
+  return d.toLocaleDateString([], {day:'numeric', month:'short'});
+}
+function formatDate(ts) {
+  return new Date(ts).toLocaleDateString([], {day:'numeric', month:'long', year:'numeric'});
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ══════════════════════════════
+//  SCREEN NAVIGATION
+// ══════════════════════════════
+function showScreen(id, push = true) {
+  if (push) {
+    if (screenHistory[screenHistory.length - 1] !== id) screenHistory.push(id);
+  } else {
+    if (!screenHistory.length || screenHistory[screenHistory.length - 1] !== id) {
+      screenHistory.push(id);
+    }
+  }
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+
+function goBack() {
+  screenHistory.pop();
+  const prev = screenHistory[screenHistory.length - 1] || 'screen-list';
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById(prev).classList.remove('hidden');
+  if (prev === 'screen-list') renderChatList();
+}
+
+// ══════════════════════════════
+//  AUTH
+// ══════════════════════════════
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t, i) => t.classList.toggle('active', (i === 0) === (tab === 'login')));
+  document.getElementById('form-login').classList.toggle('hidden', tab !== 'login');
+  document.getElementById('form-register').classList.toggle('hidden', tab !== 'register');
+  document.getElementById('login-error').textContent = '';
+  document.getElementById('reg-error').textContent = '';
+}
+
+function doLogin() {
+  const username = document.getElementById('login-username').value.trim().replace('@','');
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  errEl.textContent = '';
+  if (!username || !password) { errEl.textContent = 'Please fill in all fields.'; return; }
+  const user = DB.getUserByUsername(username);
+  if (!user || user.password !== password) { errEl.textContent = 'Invalid username or password.'; return; }
+  DB.setSession(user.username);
+  currentUser = user.username;
+  enterApp();
+}
+
+function doRegister() {
+  const displayName = document.getElementById('reg-displayname').value.trim();
+  const username = document.getElementById('reg-username').value.trim().replace('@','').toLowerCase();
+  const password = document.getElementById('reg-password').value;
+  const errEl = document.getElementById('reg-error');
+  errEl.textContent = '';
+  if (!displayName || !username || !password) { errEl.textContent = 'Please fill in all fields.'; return; }
+  if (username.length < 3) { errEl.textContent = 'Username must be at least 3 characters.'; return; }
+  if (!/^[a-z0-9_]+$/.test(username)) { errEl.textContent = 'Username: only letters, numbers, underscores.'; return; }
+  if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+  if (!DB.createUser(displayName, username, password)) { errEl.textContent = 'That username is already taken.'; return; }
+  DB.setSession(username);
+  currentUser = username;
+  enterApp();
+}
+
+function doLogout() {
+  DB.clearSession();
+  currentUser = null; currentChatWith = null; screenHistory = [];
+  document.getElementById('login-username').value = '';
+  document.getElementById('login-password').value = '';
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById('screen-auth').classList.remove('hidden');
+  screenHistory = ['screen-auth'];
+}
+
+// ══════════════════════════════
+//  APP ENTRY
+// ══════════════════════════════
+function enterApp() {
+  screenHistory = ['screen-list'];
+  renderChatList();
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById('screen-list').classList.remove('hidden');
+}
+
+// ══════════════════════════════
+//  CHAT LIST
+// ══════════════════════════════
+function renderChatList(filter = '') {
+  const body = document.getElementById('chat-list-body');
+  let convos = DB.getConversations(currentUser);
+  if (filter) {
+    convos = convos.filter(u => {
+      const user = DB.getUserByUsername(u);
+      return user && (user.displayName.toLowerCase().includes(filter.toLowerCase()) || u.includes(filter.toLowerCase()));
     });
   }
+  if (!convos.length) {
+    body.innerHTML = `<div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <p>${filter ? 'No chats match your search.' : 'No chats yet.\nTap the 🔍 icon above to find someone to chat with.'}</p>
+    </div>`;
+    return;
+  }
+  body.innerHTML = convos.map(username => {
+    const user = DB.getUserByUsername(username);
+    if (!user) return '';
+    const msgs = DB.getChat(currentUser, username);
+    const last = msgs[msgs.length - 1];
+    const isMe = last && last.from === currentUser;
+    const preview = last ? (isMe ? `<span class="you">You: </span>${escHtml(last.text)}` : escHtml(last.text)) : '<em style="color:#aaa">No messages yet</em>';
+    const time = last ? formatTime(last.ts) : '';
+    return `<div class="chat-item" onclick="openChat('${escHtml(username)}')">
+      <div class="avatar" style="background:${user.color}">${getInitials(user.displayName)}</div>
+      <div class="chat-info">
+        <div class="chat-name-row">
+          <span class="chat-name">${escHtml(user.displayName)}</span>
+          <span class="chat-time">${time}</span>
+        </div>
+        <div class="chat-preview">${preview}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
 
-  // --- CHAT ROOM ---
-  function openChat(contact) {
-    currentChatId = contact.id;
-    els.chatRoomName.textContent = contact.display;
-    switchView('chat-room-view');
-    renderMessages();
+function filterChats(v) { renderChatList(v); }
+
+// ══════════════════════════════
+//  CHAT ROOM
+// ══════════════════════════════
+function openChat(username) {
+  const user = DB.getUserByUsername(username);
+  if (!user) return;
+  currentChatWith = username;
+  const avatarEl = document.getElementById('chat-header-avatar');
+  avatarEl.textContent = getInitials(user.displayName);
+  avatarEl.style.background = user.color;
+  document.getElementById('chat-header-name').textContent = user.displayName;
+  document.getElementById('chat-header-status').textContent = '@' + user.username;
+  renderMessages();
+  showScreen('screen-chat');
+  setTimeout(scrollMessages, 80);
+}
+
+function renderMessages() {
+  const body = document.getElementById('messages-body');
+  const msgs = DB.getChat(currentUser, currentChatWith);
+  if (!msgs.length) {
+    body.innerHTML = `<div class="empty-state" style="background:transparent">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <p>Send a message to start the conversation</p>
+    </div>`;
+    return;
+  }
+  let html = '', lastDate = null;
+  msgs.forEach(msg => {
+    const d = formatDate(msg.ts);
+    if (d !== lastDate) { html += `<div class="date-divider">${d}</div>`; lastDate = d; }
+    const isOut = msg.from === currentUser;
+    const t = new Date(msg.ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    html += `<div class="msg-wrapper ${isOut ? 'out' : 'in'}">
+      <div class="msg-bubble">${escHtml(msg.text)}</div>
+      <div class="msg-meta">
+        <span>${t}</span>
+        ${isOut ? `<svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
+      </div>
+    </div>`;
+  });
+  body.innerHTML = html;
+}
+
+function scrollMessages() {
+  const b = document.getElementById('messages-body');
+  b.scrollTop = b.scrollHeight;
+}
+
+function sendMessage() {
+  const input = document.getElementById('msg-input');
+  const text = input.value.trim();
+  if (!text || !currentChatWith) return;
+  input.value = '';
+  DB.addMessage(currentUser, currentChatWith, text);
+  renderMessages();
+  scrollMessages();
+  // Demo bot auto-reply
+  if (currentChatWith === 'demobot') {
+    const replies = ['Sounds great! 😊','Interesting! Tell me more.','Got it 👍','Sure thing!','lol 😄','Hmm, let me think about that...','🎉','On it!','Roger that!','That\'s fascinating!'];
     setTimeout(() => {
-      els.messagesContainer.scrollTop = els.messagesContainer.scrollHeight;
-    }, 10);
+      DB.addMessage(currentChatWith, currentUser, replies[Math.floor(Math.random() * replies.length)]);
+      const chatScreen = document.getElementById('screen-chat');
+      if (!chatScreen.classList.contains('hidden')) { renderMessages(); scrollMessages(); }
+    }, 700 + Math.random() * 1200);
   }
+}
 
-  els.chatBackBtn.addEventListener('click', () => {
-    currentChatId = null;
-    showChatList();
-  });
+function handleMsgKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
 
-  function renderMessages() {
-    els.messagesContainer.innerHTML = '';
-    const allMsgs = DB.getMessages();
-    const msgs = allMsgs[currentChatId] || [];
-    
-    // Seed initial greeting if no history exists
-    if (msgs.length === 0) {
-      const botContact = BOT_CONTACTS.find(c => c.id === currentChatId);
-      msgs.push({ text: botContact.lastMsg, from: 'them', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
-      allMsgs[currentChatId] = msgs;
-      DB.saveMessages(allMsgs);
-    }
+// ══════════════════════════════
+//  NEW CHAT MODAL
+// ══════════════════════════════
+function openNewChatModal() {
+  document.getElementById('user-search-input').value = '';
+  document.getElementById('user-search-results').innerHTML = '<div style="padding:16px 4px;font-size:13px;color:var(--tg-text-secondary);">Start typing to find users</div>';
+  document.getElementById('new-chat-modal').classList.add('open');
+  setTimeout(() => document.getElementById('user-search-input').focus(), 350);
+}
+function closeNewChatModal() { document.getElementById('new-chat-modal').classList.remove('open'); }
+function handleModalClick(e) { if (e.target.id === 'new-chat-modal') closeNewChatModal(); }
 
-    msgs.forEach(msg => {
-      const div = document.createElement('div');
-      div.className = `msg ${msg.from === 'me' ? 'msg-out' : 'msg-in'}`;
-      
-      div.textContent = msg.text;
-      
-      const timeSpan = document.createElement('span');
-      timeSpan.className = 'msg-time';
-      timeSpan.textContent = msg.time;
-      div.appendChild(timeSpan);
-      
-      els.messagesContainer.appendChild(div);
-    });
+function searchUsers(val) {
+  const results = document.getElementById('user-search-results');
+  if (!val) { results.innerHTML = '<div style="padding:16px 4px;font-size:13px;color:var(--tg-text-secondary);">Start typing to find users</div>'; return; }
+  const q = val.replace('@','').toLowerCase();
+  const matches = Object.values(DB.getUsers()).filter(u =>
+    u.username !== currentUser && (u.username.includes(q) || u.displayName.toLowerCase().includes(q))
+  );
+  if (!matches.length) {
+    results.innerHTML = '<div style="padding:16px;text-align:center;color:var(--tg-text-secondary);font-size:14px;">No users found</div>';
+    return;
   }
+  results.innerHTML = matches.map(u => `
+    <div class="user-result" onclick="startChat('${escHtml(u.username)}')">
+      <div class="avatar small" style="background:${u.color}">${getInitials(u.displayName)}</div>
+      <div class="user-result-info">
+        <div class="user-result-name">${escHtml(u.displayName)}</div>
+        <div class="user-result-username">@${u.username}</div>
+      </div>
+    </div>
+  `).join('');
+}
 
-  function sendMessage() {
-    const text = els.msgInput.value.trim();
-    if (!text || !currentChatId) return;
-    
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const allMsgs = DB.getMessages();
-    
-    if (!allMsgs[currentChatId]) allMsgs[currentChatId] = [];
-    allMsgs[currentChatId].push({ text, from: 'me', time });
-    DB.saveMessages(allMsgs);
-    
-    els.msgInput.value = '';
-    renderMessages();
-    els.messagesContainer.scrollTop = els.messagesContainer.scrollHeight;
-    
-    // Simulate auto-response from bots
-    setTimeout(() => {
-      allMsgs[currentChatId].push({ 
-        text: "I'm just a simulated bot running locally in your browser!", 
-        from: 'them', 
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
-      });
-      DB.saveMessages(allMsgs);
-      
-      if (document.getElementById('chat-room-view').classList.contains('active')) {
-        renderMessages();
-        els.messagesContainer.scrollTop = els.messagesContainer.scrollHeight;
-      }
-    }, 1200);
+function startChat(username) {
+  closeNewChatModal();
+  setTimeout(() => { openChat(username); renderChatList(); }, 300);
+}
+
+// ══════════════════════════════
+//  SETTINGS
+// ══════════════════════════════
+function showSettings() {
+  const u = DB.getUserByUsername(currentUser);
+  document.getElementById('settings-avatar').textContent = getInitials(u.displayName);
+  document.getElementById('settings-avatar').style.background = u.color;
+  document.getElementById('settings-disp-name').textContent = u.displayName;
+  document.getElementById('settings-disp-username').textContent = '@' + u.username;
+  document.getElementById('settings-username-readonly').textContent = '@' + u.username;
+  document.getElementById('settings-name-input').value = u.displayName;
+  showScreen('screen-settings');
+}
+
+function saveProfile() {
+  const newName = document.getElementById('settings-name-input').value.trim();
+  if (!newName) { showToast('Display name cannot be empty'); return; }
+  DB.updateDisplayName(currentUser, newName);
+  document.getElementById('settings-disp-name').textContent = newName;
+  showToast('Profile updated!');
+}
+
+// ══════════════════════════════
+//  SEED DEMO DATA
+// ══════════════════════════════
+function seedDemoData() {
+  if (Object.keys(DB.getUsers()).length > 0) return;
+  DB.createUser('Alice Johnson', 'alice', 'password123');
+  DB.createUser('Bob Smith', 'bob', 'password123');
+  DB.createUser('Demo Bot', 'demobot', 'password123');
+  DB.addMessage('alice', 'bob', 'Hey Bob! How are you doing?');
+  DB.addMessage('bob', 'alice', "Hey Alice! I'm great, thanks for asking 😊");
+  DB.addMessage('alice', 'bob', 'Did you see the latest Telegram update?');
+  DB.addMessage('bob', 'alice', 'Not yet, what\'s new?');
+  DB.addMessage('alice', 'bob', 'Lots of cool features! Check it out.');
+  DB.addMessage('demobot', 'alice', 'Hello! I\'m the Demo Bot 🤖 Message me anything and I\'ll reply automatically!');
+}
+
+// ══════════════════════════════
+//  BOOT
+// ══════════════════════════════
+(function init() {
+  seedDemoData();
+  const session = DB.getSession();
+  if (session && DB.getUserByUsername(session)) {
+    currentUser = session;
+    screenHistory = ['screen-list'];
+    renderChatList();
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById('screen-list').classList.remove('hidden');
+  } else {
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById('screen-auth').classList.remove('hidden');
+    screenHistory = ['screen-auth'];
   }
-
-  els.sendMsgBtn.addEventListener('click', sendMessage);
-  els.msgInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      sendMessage();
-    }
-  });
-
-  // --- SETTINGS ---
-  els.settingsBtn.addEventListener('click', () => {
-    switchView('settings-view');
-    els.settingsAvatar.textContent = currentUser.display.charAt(0).toUpperCase();
-    els.settingsNameDisplay.textContent = currentUser.display;
-    els.settingsUsername.textContent = '@' + currentUser.username;
-    els.settingsDisplayInput.value = currentUser.display;
-  });
-
-  els.settingsBackBtn.addEventListener('click', () => {
-    showChatList();
-  });
-
-  els.settingsSaveBtn.addEventListener('click', () => {
-    const newDisplay = els.settingsDisplayInput.value.trim();
-    if (!newDisplay) return alert("Display name cannot be empty");
-    
-    currentUser.display = newDisplay;
-    localStorage.setItem('tg_currentUser', JSON.stringify(currentUser));
-    
-    // Update display name in user DB
-    const users = DB.getUsers();
-    users[currentUser.username].display = newDisplay;
-    DB.saveUsers(users);
-    
-    els.settingsAvatar.textContent = currentUser.display.charAt(0).toUpperCase();
-    els.settingsNameDisplay.textContent = currentUser.display;
-    
-    // Slight delay to feel like a real save
-    setTimeout(() => showChatList(), 200);
-  });
-
-  els.logoutBtn.addEventListener('click', () => {
-    localStorage.removeItem('tg_currentUser');
-    currentUser = null;
-    isLoginMode = true;
-    switchView('login-view');
-    renderAuthForm();
-  });
-
-  // Initialize App
-  init();
+})();
 </script>
-
 </body>
 </html>
