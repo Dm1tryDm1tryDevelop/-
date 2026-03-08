@@ -569,15 +569,21 @@ body{font-family:'Inter',sans-serif;color:var(--text);position:fixed;inset:0}
 .task-claim:active{transform:scale(.93)}
 .task-claimed{color:var(--green);font-size:12px;font-weight:700}
 /* Gifts */
-.gift-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;
-  padding:10px 6px;border-radius:16px;border:2px solid transparent;transition:all .2s}
-.gift-item:active{background:var(--bg2)}
-.gift-item.sel{border-color:var(--blue);background:var(--blue3)}
-.gift-anim{font-size:40px;animation:giftFloat 2s ease-in-out infinite alternate;
-  filter:drop-shadow(0 4px 8px rgba(0,0,0,.2))}
-@keyframes giftFloat{from{transform:translateY(0) scale(1)}to{transform:translateY(-6px) scale(1.06)}}
+.gift-item{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;
+  padding:14px 8px;border-radius:18px;border:2px solid var(--border);transition:all .22s;background:var(--bg2)}
+.gift-item:active{transform:scale(.95)}
+.gift-item.sel{border-color:var(--blue);background:var(--blue3);box-shadow:0 0 0 3px rgba(42,171,238,.18)}
+.gift-visual{width:64px;height:64px;display:flex;align-items:center;justify-content:center;
+  filter:drop-shadow(0 4px 10px rgba(0,0,0,.25))}
+.gift-visual svg{width:64px;height:64px}
+@keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes giftFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes giftSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes giftPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
+@keyframes giftBeat{0%,100%{transform:scale(1)}25%{transform:scale(1.2)}50%{transform:scale(.95)}75%{transform:scale(1.08)}}
+@keyframes giftBounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-10px) scaleY(1.05)}70%{transform:translateY(-5px)}}
 .gift-name{font-size:12px;font-weight:700;color:var(--text)}
-.gift-price{font-size:11px;color:#d97706;font-weight:700}
+.gift-price{font-size:11px;color:#d97706;font-weight:800}
 /* Profile gifts display */
 .gift-showcase{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px}
 .gift-bubble{background:var(--bg2);border-radius:16px;padding:8px 12px;display:flex;
@@ -789,7 +795,7 @@ input:-webkit-autofill{-webkit-box-shadow:0 0 0 100px var(--bg) inset!important;
   <div class="body">
     <div class="prof-hero">
       <div class="prof-av" id="prof-av"></div>
-      <div><div class="prof-name" id="prof-name"></div><div class="prof-un" id="prof-un"></div><div class="prof-status" id="prof-status"></div></div>
+      <div><div class="prof-name" id="prof-name"></div><div class="prof-un" id="prof-un"></div><div id="prof-dev-badge"></div><div class="prof-status" id="prof-status"></div></div>
     </div>
     <div class="prof-actions" id="prof-actions"></div>
     <div class="prof-bio-sec" id="prof-bio-sec" style="display:none"><div class="prof-bio-title">О себе</div><div class="prof-bio-text" id="prof-bio"></div></div>
@@ -901,7 +907,7 @@ input:-webkit-autofill{-webkit-box-shadow:0 0 0 100px var(--bg) inset!important;
     <div id="gift-selected-info" style="display:none;background:var(--bg2);border-radius:16px;padding:14px;margin-bottom:14px">
       <div style="font-size:13px;color:var(--t2);margin-bottom:4px">Выбран подарок:</div>
       <div style="display:flex;align-items:center;gap:10px">
-        <span id="gift-sel-ico" style="font-size:32px"></span>
+        <div id="gift-sel-ico"></div>
         <div><div id="gift-sel-name" style="font-weight:700;font-size:15px"></div><div id="gift-sel-price" style="color:#d97706;font-weight:700;font-size:13px"></div></div>
       </div>
     </div>
@@ -955,7 +961,7 @@ const ALL_EMOJIS=['😁','🥹','😅','😏','🥲','🤣','😛','😄','😮'
 // TICK1: single thin grey checkmark
 const TICK1 = '<svg width="13" height="9" viewBox="0 0 13 9" fill="none" style="display:inline-block;vertical-align:middle;flex-shrink:0;margin-left:1px"><path d="M1.5 4.5L4.8 7.8L11.5 1.2" stroke="#9aabb8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 // TICK2: two separate blue checkmarks (offset so they look distinct)
-const TICK2 = '<svg width="21" height="9" viewBox="0 0 21 9" fill="none" style="display:inline-block;vertical-align:middle;flex-shrink:0;margin-left:1px"><path d="M1.5 4.5L4.8 7.8L11.5 1.2" stroke="#2AABEE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.5 4.5L12.8 7.8L19.5 1.2" stroke="#2AABEE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const TICK2 = '<svg width="18" height="9" viewBox="0 0 18 9" fill="none" style="display:inline-block;vertical-align:middle;flex-shrink:0;margin-left:1px"><path d="M1.5 4.5L4.5 7.5L9.5 1.5" stroke="#2AABEE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 4.5L10.5 7.5L16 1.5" stroke="#2AABEE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 // ── STATE ──────────────────────────────────────────────────────────
 let ME=null,ALL_USERS={},ALL_CHATS={},MESSAGES={};
@@ -984,7 +990,7 @@ function avUser(u,cls=''){
   return`<div class="av ${cls}" style="background:${u.color||'#2196F3'};${devRing}">${ini(u.name)}</div>`;
 }
 function chatName(c){if(!c)return'?';if(c.type==='group')return c.name||'Группа';const o=Object.keys(c.members||{}).find(m=>m!==ME);return o&&ALL_USERS[o]?ALL_USERS[o].name:'Удалённый';}
-function chatStatus(c){if(!c)return'';if(c.type==='group'){const tot=Object.keys(c.members||{}).length;const onl=Object.keys(c.members||{}).filter(m=>m!==ME&&ALL_USERS[m]?.online).length;return`${tot} участников${onl?' · '+onl+' в сети':''}`;}const o=Object.keys(c.members||{}).find(m=>m!==ME);const u=o?ALL_USERS[o]:null;if(!u)return'';return u.online?'в сети':`был(а) ${fmtLastSeen(u.lastSeen)}`;}
+function chatStatus(c){if(!c)return'';if(c.type==='group'){const tot=Object.keys(c.members||{}).length;const onl=Object.keys(c.members||{}).filter(m=>m!==ME&&ALL_USERS[m]?.online&&ALL_USERS[m]?.lastSeen&&Date.now()-ALL_USERS[m].lastSeen<35000).length;return`${tot} участников${onl?' · '+onl+' в сети':''}`;}const o=Object.keys(c.members||{}).find(m=>m!==ME);const u=o?ALL_USERS[o]:null;if(!u)return'';return (u.online&&u.lastSeen&&Date.now()-u.lastSeen<35000)?'в сети':`был(а) ${fmtLastSeen(u.lastSeen)}`;}
 
 // ── ACCENT & FONT COLOR PRESETS ────────────────────────────────────
 const ACCENT_PRESETS=[
@@ -1156,6 +1162,21 @@ function subscribeGlobal(){
   if(usersUnsub)try{usersUnsub();}catch{}
   usersUnsub=onValue(ref(db,'users'),snap=>{ALL_USERS=snap.val()||{};renderChatList();if(curChatId)updateChatHeader();});
   if(chatUnsub)try{chatUnsub();}catch{}
+  // Subscribe to notifications for current user
+  if(ME){onValue(ref(db,'notifications/'+ME),snap=>{
+    if(!snap.exists())return;
+    const notifs=Object.entries(snap.val()||{});
+    notifs.forEach(([nid,n])=>{
+      if(!n.read&&n.type==='gift'){
+        // Mark as read
+        update(ref(db,'notifications/'+ME+'/'+nid),{read:true}).catch(()=>{});
+        // Find gift catalog entry for SVG
+        const cat=GIFT_CATALOG.find(x=>x.id===n.giftId)||{svg:'🎁',id:n.giftId};
+        // Show gold notification banner
+        showGiftNotification(n,cat);
+      }
+    });
+  });}
   chatUnsub=onValue(ref(db,'chats'),snap=>{
     const prev=Object.keys(ALL_CHATS);
     ALL_CHATS=snap.val()||{};
@@ -1225,7 +1246,12 @@ function recalcUnread(chatId, msgsSnap){
   Object.values(msgs).forEach(m=>{
     if(m.from!==ME&&!m.deleted&&!m.system&&(!m.readBy||!m.readBy[ME]))count++;
   });
-  UNREAD_CACHE[chatId]=count;
+  if(UNREAD_CACHE[chatId]!==count){
+    UNREAD_CACHE[chatId]=count;
+    renderChatList();
+  }else{
+    UNREAD_CACHE[chatId]=count;
+  }
 }
 
 // ── CHAT LIST ──────────────────────────────────────────────────────
@@ -1242,7 +1268,7 @@ function renderChatList(filter=''){
     else if(isMe)snd='<span class="you">Вы: </span>';
     const draftTxt=DRAFTS[chat.id];
     const prev=draftTxt?`<span style="color:var(--orange);font-weight:600">Черновик: </span>${esc(draftTxt).slice(0,45)}`:(chat.lastMsg?`${snd}${esc(chat.lastMsg).slice(0,55)}`:'<em style="color:var(--t4)">Нет сообщений</em>');
-    let dot='';if(chat.type==='dm'){const o=Object.keys(chat.members||{}).find(m=>m!==ME);if(o&&ALL_USERS[o]?.online)dot='<div class="odot"></div>';}
+    let dot='';if(chat.type==='dm'){const o=Object.keys(chat.members||{}).find(m=>m!==ME);if(o&&(ALL_USERS[o]?.online&&ALL_USERS[o]?.lastSeen&&Date.now()-ALL_USERS[o].lastSeen<35000))dot='<div class="odot"></div>';}
     const avEl=buildListAv(chat,dot);
     const unread=getUnread(chat.id);
     const badge=unread?`<div class="ubadge">${unread}</div>`:'';
@@ -1303,14 +1329,16 @@ function updateChatHeader(){
     gb.style.display='block';gb.innerHTML=`👥 ${Object.keys(chat.members||{}).map(m=>esc(ALL_USERS[m]?.name||m)).join(', ')}`;
   }else{
     gb.style.display='none';const o=Object.keys(chat.members||{}).find(m=>m!==ME);const u=o?ALL_USERS[o]:null;
-    if(u){if(u.avatar){avEl.innerHTML=`<img src="${u.avatar}" alt="">`;avEl.style.background='transparent';}else{avEl.innerHTML=ini(u.name);avEl.style.background=u.color||'#2196F3';}if(u.username==='dm1try')avEl.style.boxShadow='0 0 0 3px #ffd700,0 0 12px #ffd700';else avEl.style.boxShadow='';nm.textContent=u.name;st.textContent=chatStatus(chat);st.style.color=u.online?'#a5f3c7':'rgba(255,255,255,.72)';}
+    if(u){if(u.avatar){avEl.innerHTML=`<img src="${u.avatar}" alt="">`;avEl.style.background='transparent';}else{avEl.innerHTML=ini(u.name);avEl.style.background=u.color||'#2196F3';}if(u.username==='dm1try')avEl.style.boxShadow='0 0 0 3px #ffd700,0 0 12px #ffd700';else avEl.style.boxShadow='';nm.textContent=u.name;st.textContent=chatStatus(chat);st.style.color=(u.online&&u.lastSeen&&Date.now()-u.lastSeen<35000)?'#a5f3c7':'rgba(255,255,255,.72)';}
   }
 }
 
 // ── RENDER MESSAGES ────────────────────────────────────────────────
 function renderMessages(){
   const body=document.getElementById('msgs-body');
-  const wasBottom=body.scrollHeight-body.scrollTop-body.clientHeight<80;
+  const atBottom=body.scrollHeight-body.scrollTop-body.clientHeight<100;
+  const savedTop=body.scrollTop;
+  const oldHeight=body.scrollHeight;
   const chat=ALL_CHATS[curChatId];
   const msgs=Object.values(MESSAGES).sort((a,b)=>a.ts-b.ts);
   if(!msgs.length){body.innerHTML=`<div class="empty" style="background:transparent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><h3>Начните общение</h3><p>Напишите первое сообщение!</p></div>`;return;}
@@ -1342,9 +1370,7 @@ function renderMessages(){
         <button id="fsbtn_${msg.id}" onclick="openVidView('${msg.id}');event.stopPropagation()" style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.6);border:none;border-radius:8px;padding:5px 9px;color:#fff;font-size:11px;font-weight:600;cursor:pointer;backdrop-filter:blur(4px);z-index:2;display:flex;align-items:center;gap:4px">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>Полный экран
         </button>
-        <button onclick="downloadVideo('${msg.id}');event.stopPropagation()" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.5);border:none;border-radius:8px;padding:5px 8px;color:#fff;font-size:11px;cursor:pointer;backdrop-filter:blur(3px);z-index:2">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        </button>
+        
       </div>`;
       // Load video src after render (handles both direct and IDB refs)
       setTimeout(async()=>{
@@ -1354,10 +1380,11 @@ function renderMessages(){
       },50);
     }
     // Music
-    if(msg.audio&&!isDel){
-      const aud_id='aud_'+msg.id;
+    if((msg.audio||msg.audioRef)&&!isDel){
+      const audEl_id='aud_'+msg.id;
       const fname=msg.audioName||'Аудио';
-      const fsize=msg.audioSize?Math.round(msg.audioSize/1024)+'кб':'';
+      const fsizeRaw=msg.audioSize||0;
+      const fsize=fsizeRaw>1048576?(Math.round(fsizeRaw/104857.6)/10)+'МБ':fsizeRaw>0?Math.round(fsizeRaw/1024)+'КБ':'';
       mediaHtml=`<div class="mmusic" onclick="event.stopPropagation()" id="mmusic_${msg.id}">
         <div class="mmusic-top">
           <div class="mmusic-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
@@ -1372,19 +1399,23 @@ function renderMessages(){
           <div class="meq-bar"></div>
         </div>
         <div class="mmusic-controls">
-          <button class="mmusic-playbtn" id="playbtn_${msg.id}" onclick="toggleAudio('${msg.id}','${msg.audio.slice(0,30)}')">
+          <button class="mmusic-playbtn" id="playbtn_${msg.id}" onclick="toggleAudio('${msg.id}')">
             <svg id="playico_${msg.id}" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           </button>
           <div class="mmusic-progress" id="prog_${msg.id}" onclick="seekAudio(event,'${msg.id}')">
             <div class="mmusic-filled" id="progfill_${msg.id}"></div>
           </div>
           <div class="mmusic-time" id="audtime_${msg.id}">0:00</div>
-          <button class="mmusic-dl" onclick="downloadAudio('${msg.id}');event.stopPropagation()" title="Скачать">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          </button>
         </div>
-        <audio id="${aud_id}" preload="metadata" style="display:none"></audio>
-      </div>`;}
+        <audio id="${audEl_id}" preload="none" style="display:none"></audio>
+      </div>`;
+      setTimeout(async()=>{
+        const a=document.getElementById(audEl_id);if(!a)return;
+        if(!a.src||a.src==='about:blank'||a.src===location.href){
+          const s=await resolveMediaSrc(msg,'audio');if(s){a.src=s;}
+        }
+      },80);
+    }
     // Async load media from IDB if needed (after render)
     if((msg.video||msg.videoRef)&&!isDel){
       setTimeout(async()=>{const v=document.getElementById('vid_'+msg.id);if(v&&!v.src){const s=await resolveMediaSrc(msg,'video');if(s)v.src=s;}},60);
@@ -1415,9 +1446,16 @@ function renderMessages(){
     }
   });
   body.innerHTML=html;
-  if(wasBottom)scrollMsgs();
+  // Restore scroll position without jumping
+  if(atBottom){
+    body.scrollTop=body.scrollHeight;
+  }else{
+    // Keep same visual position
+    const delta=body.scrollHeight-oldHeight;
+    body.scrollTop=savedTop+delta;
+  }
 }
-function scrollMsgs(){const b=document.getElementById('msgs-body');b.scrollTop=b.scrollHeight;}
+function scrollMsgs(){const b=document.getElementById('msgs-body');requestAnimationFrame(()=>{b.scrollTop=b.scrollHeight+9999;});}
 window.scrollToMsg=function(id){const el=document.querySelector(`.mw[data-id="${id}"]`);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});const bubble=el.querySelector('.mb');if(bubble){bubble.style.transition='box-shadow .2s';bubble.style.boxShadow=`0 0 0 3px var(--blue), 0 0 20px rgba(42,171,238,.35)`;setTimeout(()=>{bubble.style.boxShadow='';bubble.style.transition='';},1600);}else{el.style.outline='2px solid var(--blue)';el.style.borderRadius='12px';setTimeout(()=>{el.style.outline='';},1500);}}};
 
 // ── CONTEXT PANEL ──────────────────────────────────────────────────
@@ -1606,20 +1644,19 @@ window.openUserProfile=function(un){
   if(u.avatar)avEl.innerHTML=`<img src="${u.avatar}" alt="">`;
   else avEl.innerHTML=`<div style="background:${u.color||'#2196F3'};width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#fff">${ini(u.name)}</div>`;
   const isDev2=un==='dm1try';
+  // Always clear badge div first — prevents duplicates on repeat visits
+  const dbEl=document.getElementById('prof-dev-badge');
+  if(dbEl)dbEl.innerHTML='';
   if(isDev2){
     document.getElementById('prof-name').innerHTML=`<span style="background:linear-gradient(90deg,#b8860b,#ffd700,#b8860b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:800">${esc(u.name)}</span>`;
     document.getElementById('prof-un').innerHTML=`<span style="color:rgba(255,255,255,.72)">@${u.username}</span>`;
-    // Insert dev badge below name
-    const devBadge=document.createElement('div');
-    devBadge.style.cssText='display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#b8860b,#ffd700,#b8860b);color:#000;font-size:11px;font-weight:800;padding:4px 10px;border-radius:12px;margin-top:5px;box-shadow:0 2px 10px rgba(255,215,0,.5)';
-    devBadge.innerHTML='👑 Разработчик мессенджера';
-    document.getElementById('prof-status').parentNode.insertBefore(devBadge,document.getElementById('prof-status').nextSibling);
+    if(dbEl)dbEl.innerHTML='<span style="display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#b8860b,#ffd700,#b8860b);color:#000;font-size:11px;font-weight:800;padding:3px 10px;border-radius:12px;margin-top:4px;box-shadow:0 2px 8px rgba(255,215,0,.5)">👑 Разработчик мессенджера</span>';
   }else{
     document.getElementById('prof-name').textContent=u.name;
     document.getElementById('prof-un').textContent='@'+u.username;
   }
   const st=document.getElementById('prof-status');
-  if(u.online){st.textContent='● В сети';st.className='prof-status on';}else{st.textContent='Был(а) '+fmtLastSeen(u.lastSeen);st.className='prof-status off';}
+  if(u.online&&u.lastSeen&&Date.now()-u.lastSeen<35000){st.textContent='● В сети';st.className='prof-status on';}else{st.textContent='Был(а) '+fmtLastSeen(u.lastSeen);st.className='prof-status off';}
   const bioSec=document.getElementById('prof-bio-sec');
   if(u.bio){document.getElementById('prof-bio').textContent=u.bio;bioSec.style.display='block';}else bioSec.style.display='none';
   const profActionsHtml=un!==ME?`<button class="btn pr" style="flex:1" onclick="startDMWith('${un}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Написать</button><button class="btn gh" style="flex:1" onclick="openGifts('${un}')">🎁 Подарить</button>`:'<button class="btn gh" style="flex:1;pointer-events:none" onclick="openTasks()">🪙 Мои задания</button>';
@@ -1628,7 +1665,13 @@ window.openUserProfile=function(un){
   loadUserGifts(un).then(gifts=>{
     const showcase=document.getElementById('prof-gifts-showcase');if(!showcase)return;
     if(!gifts.length){showcase.innerHTML='<div style="font-size:12px;color:var(--t2);padding:8px 16px">Нет подарков</div>';return;}
-    showcase.innerHTML=gifts.slice(0,8).map(g=>`<div class="gift-bubble"><span style="font-size:24px;animation:giftFloat 2s ease-in-out infinite alternate">${g.emoji}</span><div><div style="font-size:12px;font-weight:700">${g.name}</div><div class="gift-from">от ${esc(g.fromName||g.from)} · ${g.price} Mycoins</div></div></div>`).join('');
+    const gcMap={};GIFT_CATALOG.forEach(x=>gcMap[x.id]=x);
+    showcase.innerHTML=gifts.slice(0,8).map(g=>{
+      const cat=gcMap[g.id]||{svg:'',id:g.id};
+      const anim=GIFT_ANIMS[g.id]||'animation:giftFloat 2s ease-in-out infinite';
+      const miniSvg=cat.svg?`<div style="width:28px;height:28px;flex-shrink:0;${anim};filter:drop-shadow(0 2px 5px rgba(0,0,0,.18))">${cat.svg.replace('64px;height:64px','28px;height:28px')}</div>`:'';
+      return`<div class="gift-bubble">${miniSvg}<div><div style="font-size:12px;font-weight:700">${esc(g.name)}</div><div class="gift-from">от ${esc(g.fromName||g.from)} · ${g.price} Mycoins</div></div></div>`;
+    }).join('');
   });
   document.getElementById('prof-info-card').innerHTML=`<div class="srow nt"><div class="sico2" style="background:#5b8dee"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="sbody"><div class="slabel">Логин</div><div class="sval">@${u.username}</div></div></div>${u.bio?`<div class="srow nt"><div class="sico2" style="background:#8b5cf6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="sbody"><div class="slabel">О себе</div><div class="sval">${esc(u.bio)}</div></div></div>`:''}`;
   showScreen('s-profile');
@@ -1647,7 +1690,7 @@ window.searchUsers=function(q,resId){
   const qc=q.replace('@','').toLowerCase();
   const matches=Object.values(ALL_USERS).filter(u=>u.username!==ME&&(u.username.startsWith(qc)||u.name.toLowerCase().includes(qc)));
   if(!matches.length){res.innerHTML='<div style="padding:14px;text-align:center;font-size:14px;color:var(--t2)">Не найдено</div>';return;}
-  res.innerHTML=matches.map(u=>{const sel=grpSelected.includes(u.username);const fn=resId==='gs-res'?`openProfileFromSearch('${u.username}')`:`selectUser('${u.username}')`;return`<div class="urow" onclick="${fn}">${avUser(u,'sm')}<div class="urinfo"><div class="urname">${esc(u.name)}</div><div class="urun">@${u.username}${u.online?'<span style="color:var(--green);margin-left:7px;font-size:11px;font-weight:700">● в сети</span>':''}</div></div>${sel?'<div class="urchk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>':''}</div>`;}).join('');
+  res.innerHTML=matches.map(u=>{const sel=grpSelected.includes(u.username);const fn=resId==='gs-res'?`openProfileFromSearch('${u.username}')`:`selectUser('${u.username}')`;return`<div class="urow" onclick="${fn}">${avUser(u,'sm')}<div class="urinfo"><div class="urname">${esc(u.name)}</div><div class="urun">@${u.username}${(u.online&&u.lastSeen&&Date.now()-u.lastSeen<35000)?'<span style="color:var(--green);margin-left:7px;font-size:11px;font-weight:700">● в сети</span>':''}</div></div>${sel?'<div class="urchk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>':''}</div>`;}).join('');
 };
 window.openProfileFromSearch=function(un){closeModal('m-gsearch');setTimeout(()=>openUserProfile(un),300);};
 window.selectUser=function(un){
@@ -1866,7 +1909,7 @@ window.openVidView=async function(msgId){
 
 // ── AUDIO PLAYER ────────────────────────────────────────────────────
 const AUDIO_PLAYERS={};// msgId -> Audio element state
-window.toggleAudio=function(msgId, srcKey){
+window.toggleAudio=function(msgId){
   const audio=document.getElementById('aud_'+msgId);if(!audio)return;
   const btn=document.getElementById('playico_'+msgId);
   const eq=document.getElementById('meq_'+msgId);
@@ -1945,13 +1988,31 @@ window.handleMsgKey=function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefaul
 // MYCOINS SYSTEM
 // ══════════════════════════════════════════════════════════════════
 const GIFT_CATALOG=[
-  {id:'heart',   emoji:'❤️',  name:'Сердце',    price:15, desc:'Анимированное сердце'},
-  {id:'coin',    emoji:'🪙',  name:'Монетка',   price:20, desc:'Крутящаяся монетка'},
-  {id:'car',     emoji:'🏎️',  name:'Спорткар',  price:30, desc:'Быстрый спорткар'},
-  {id:'crown',   emoji:'👑',  name:'Корона',    price:50, desc:'Золотая корона'},
-  {id:'star',    emoji:'⭐',  name:'Звезда',    price:10, desc:'Яркая звезда'},
-  {id:'fire',    emoji:'🔥',  name:'Огонь',     price:12, desc:'Пламенный подарок'},
+  {id:'star', name:'Звезда', price:10,
+   svg:'<svg viewBox="0 0 64 64"><defs><radialGradient id="sg" cx="50%" cy="30%"><stop offset="0%" stop-color="#fff176"/><stop offset="100%" stop-color="#f9a825"/></radialGradient></defs><polygon points="32,6 38,24 58,24 43,36 49,54 32,42 15,54 21,36 6,24 26,24" fill="url(#sg)" stroke="#f57f17" stroke-width="1.5"/><polygon points="32,14 36,24 47,24 38,31 42,42 32,35 22,42 26,31 17,24 28,24" fill="rgba(255,255,255,.35)"/></svg>'},
+  {id:'fire', name:'Огонь', price:12,
+   svg:'<svg viewBox="0 0 64 64"><defs><linearGradient id="fireg" x1="32" y1="4" x2="32" y2="60" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#ff7043"/><stop offset="60%" stop-color="#e53935"/><stop offset="100%" stop-color="#b71c1c"/></linearGradient></defs><path d="M32 4 C24 14 14 18 16 32 C18 44 26 54 32 58 C38 54 46 44 48 32 C50 18 40 14 32 4Z" fill="url(#fireg)"/><path d="M32 22 C28 30 23 32 25 40 C27 46 30 50 32 52 C34 50 37 46 39 40 C41 32 36 30 32 22Z" fill="#ffcc02" opacity=".9"/><path d="M32 34 C30 38 29 41 30 44 C31 46 32 47 32 47 C32 47 33 46 34 44 C35 41 34 38 32 34Z" fill="#fff9c4"/></svg>'},
+  {id:'heart', name:'Сердце', price:15,
+   svg:'<svg viewBox="0 0 64 64"><defs><linearGradient id="hg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f48fb1"/><stop offset="100%" stop-color="#c62828"/></linearGradient></defs><path d="M32 54 C32 54 8 38 8 22 C8 14 14 8 22 8 C27 8 31 11 32 15 C33 11 37 8 42 8 C50 8 56 14 56 22 C56 38 32 54 32 54Z" fill="url(#hg)" stroke="#880e4f" stroke-width="1"/><path d="M16 18 C14 22 16 28 20 32" stroke="rgba(255,255,255,.4)" stroke-width="3" stroke-linecap="round" fill="none"/><ellipse cx="26" cy="18" rx="4" ry="3" fill="rgba(255,255,255,.2)" transform="rotate(-20 26 18)"/></svg>'},
+  {id:'coin', name:'Монета', price:20,
+   svg:'<svg viewBox="0 0 64 64"><defs><linearGradient id="coinG" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff176"/><stop offset="40%" stop-color="#ffd600"/><stop offset="100%" stop-color="#f57f17"/></linearGradient></defs><circle cx="32" cy="32" r="27" fill="url(#coinG)" stroke="#e65100" stroke-width="2"/><circle cx="32" cy="32" r="21" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2"/><text x="32" y="40" text-anchor="middle" font-size="24" font-weight="900" fill="#4e342e" font-family="Georgia,serif">M</text><ellipse cx="22" cy="20" rx="5" ry="3" fill="rgba(255,255,255,.25)" transform="rotate(-30 22 20)"/></svg>'},
+  {id:'car', name:'Спорткар', price:30,
+   svg:'<svg viewBox="0 0 64 64"><defs><linearGradient id="carG" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ef5350"/><stop offset="100%" stop-color="#b71c1c"/></linearGradient></defs><rect x="6" y="34" width="52" height="16" rx="5" fill="url(#carG)"/><path d="M14 34 C16 22 24 17 32 17 C40 17 48 22 50 34Z" fill="url(#carG)"/><rect x="20" y="21" width="24" height="10" rx="3" fill="#b3e5fc" opacity=".8"/><line x1="32" y1="21" x2="32" y2="31" stroke="rgba(0,0,0,.15)" stroke-width="1"/><circle cx="18" cy="50" r="7" fill="#212121" stroke="#616161" stroke-width="2"/><circle cx="18" cy="50" r="3" fill="#9e9e9e"/><circle cx="46" cy="50" r="7" fill="#212121" stroke="#616161" stroke-width="2"/><circle cx="46" cy="50" r="3" fill="#9e9e9e"/><rect x="6" y="38" width="10" height="4" rx="2" fill="#fff9c4" opacity=".9"/><rect x="48" y="38" width="10" height="4" rx="2" fill="#ff5722" opacity=".8"/></svg>'},
+  {id:'diamond', name:'Бриллиант', price:40,
+   svg:'<svg viewBox="0 0 64 64"><defs><linearGradient id="dg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e1f5fe"/><stop offset="50%" stop-color="#29b6f6"/><stop offset="100%" stop-color="#0277bd"/></linearGradient><linearGradient id="dg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fff" stop-opacity=".8"/><stop offset="100%" stop-color="#29b6f6" stop-opacity=".3"/></linearGradient></defs><polygon points="32,6 56,26 32,58 8,26" fill="url(#dg1)" stroke="#0277bd" stroke-width="1.5"/><polygon points="32,6 56,26 32,26" fill="url(#dg2)"/><polygon points="8,26 32,26 32,58" fill="#0277bd" opacity=".3"/><line x1="8" y1="26" x2="56" y2="26" stroke="rgba(255,255,255,.6)" stroke-width="1.5"/><line x1="32" y1="6" x2="20" y2="26" stroke="rgba(255,255,255,.4)" stroke-width="1"/><line x1="32" y1="6" x2="44" y2="26" stroke="rgba(255,255,255,.25)" stroke-width="1"/></svg>'},
+  {id:'crown', name:'Корона', price:50,
+   svg:'<svg viewBox="0 0 64 64"><defs><linearGradient id="crG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffe082"/><stop offset="100%" stop-color="#ff8f00"/></linearGradient><linearGradient id="crG2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#f57f17"/><stop offset="100%" stop-color="#e65100"/></linearGradient></defs><polygon points="8,48 8,24 20,38 32,12 44,38 56,24 56,48" fill="url(#crG)" stroke="#e65100" stroke-width="1.5"/><rect x="8" y="48" width="48" height="9" rx="3" fill="url(#crG2)"/><circle cx="32" cy="12" r="5" fill="#fff9c4" stroke="#f9a825" stroke-width="1.5"/><circle cx="8" cy="24" r="4" fill="#fff176" stroke="#f9a825" stroke-width="1.5"/><circle cx="56" cy="24" r="4" fill="#fff176" stroke="#f9a825" stroke-width="1.5"/><circle cx="20" cy="52" r="2.5" fill="#fff9c4"/><circle cx="32" cy="52" r="2.5" fill="#fff9c4"/><circle cx="44" cy="52" r="2.5" fill="#fff9c4"/><ellipse cx="22" cy="30" rx="6" ry="4" fill="rgba(255,255,255,.2)" transform="rotate(-15 22 30)"/></svg>'},
 ];
+// Gift SVG animations — defined in CSS
+const GIFT_ANIMS={
+  star:'animation:giftSpin 4s linear infinite',
+  fire:'animation:giftFloat 1.6s ease-in-out infinite alternate',
+  heart:'animation:giftBeat 1.2s ease-in-out infinite',
+  coin:'animation:giftSpin 3s linear infinite',
+  car:'animation:giftFloat 2s ease-in-out infinite alternate',
+  diamond:'animation:giftPulse 2s ease-in-out infinite',
+  crown:'animation:giftBounce 2.2s ease-in-out infinite',
+};
 
 // Task templates (5 daily tasks, personalized by seeding with username+date)
 const TASK_TEMPLATES=[
@@ -2058,11 +2119,12 @@ window.claimTask=function(idx){
 window.openGifts=function(targetUser){
   giftTargetUser=targetUser;selectedGiftId=null;
   loadCoins();updateCoinsDisplay();
-  document.getElementById('gifts-title').textContent='Подарить: '+( ALL_USERS[targetUser]?.name||targetUser);
+  document.getElementById('gifts-title').textContent='Подарить: '+(ALL_USERS[targetUser]?.name||targetUser);
   const grid=document.getElementById('gift-grid');
-  grid.innerHTML=GIFT_CATALOG.map(g=>`
+  const sorted=[...GIFT_CATALOG].sort((a,b)=>a.price-b.price);
+  grid.innerHTML=sorted.map(g=>`
     <div class="gift-item" id="gitem_${g.id}" onclick="selectGift('${g.id}')">
-      <div class="gift-anim" style="animation-delay:${Math.random().toFixed(1)}s">${g.emoji}</div>
+      <div class="gift-visual" style="${GIFT_ANIMS[g.id]||'animation:giftFloat 2s ease-in-out infinite'}">${g.svg}</div>
       <div class="gift-name">${g.name}</div>
       <div class="gift-price">${g.price} Mycoins</div>
     </div>`).join('');
@@ -2076,7 +2138,7 @@ window.selectGift=function(id){
   const g=GIFT_CATALOG.find(x=>x.id===id);if(!g)return;
   document.querySelectorAll('.gift-item').forEach(el=>el.classList.remove('sel'));
   const item=document.getElementById('gitem_'+id);if(item)item.classList.add('sel');
-  document.getElementById('gift-sel-ico').textContent=g.emoji;
+  document.getElementById('gift-sel-ico').innerHTML=`<div style="width:36px;height:36px;${GIFT_ANIMS[g.id]||'animation:giftFloat 2s ease-in-out infinite'};filter:drop-shadow(0 2px 6px rgba(0,0,0,.2))">${g.svg.replace('64px;height:64px','36px;height:36px')}</div>`;
   document.getElementById('gift-sel-name').textContent=g.name;
   document.getElementById('gift-sel-price').textContent=g.price+' Mycoins';
   document.getElementById('gift-selected-info').style.display='block';
@@ -2091,18 +2153,59 @@ window.sendGift=async function(){
   if(MY_COINS<g.price){showToast('Недостаточно Mycoins');return;}
   MY_COINS-=g.price;saveCoins();updateCoinsDisplay();
   // Save gift to recipient profile in Firebase
-  const giftData={id:push(ref(db,'_')).key,from:ME,fromName:ALL_USERS[ME]?.name||ME,emoji:g.emoji,name:g.name,price:g.price,ts:Date.now()};
+  const senderName=ALL_USERS[ME]?.name||ME;
+  const recipientName=ALL_USERS[giftTargetUser]?.name||giftTargetUser;
+  const giftData={id:'tmp',from:ME,fromName:senderName,name:g.name,price:g.price,ts:Date.now()};
   const giftRef=push(ref(db,'gifts/'+giftTargetUser));
-  await set(giftRef,{...giftData,id:giftRef.key});
+  giftData.id=giftRef.key;
+  await set(giftRef,giftData);
+  // Notification for recipient
+  const notifRef=push(ref(db,'notifications/'+giftTargetUser));
+  await set(notifRef,{type:'gift',from:ME,fromName:senderName,giftId:g.id,giftName:g.name,price:g.price,ts:Date.now(),read:false});
   // Update giver's coins in Firebase
   await update(ref(db,'users/'+ME),{mycoins:MY_COINS});
-  // Coin fly
-  const el=document.createElement('div');el.className='coin-fly';el.textContent=g.emoji;
-  el.style.left=(window.innerWidth/2-14)+'px';el.style.top=(window.innerHeight/2)+'px';
+  // Coin fly animation
+  const el=document.createElement('div');el.className='coin-fly';el.textContent='🪙';
+  el.style.cssText=`position:fixed;left:${window.innerWidth/2-12}px;top:${window.innerHeight/2}px;font-size:24px;z-index:9999;pointer-events:none`;
   document.body.appendChild(el);setTimeout(()=>el.remove(),800);
-  showToast(`Подарок "${g.name}" отправлен! 🎁`);
+  showToast(`Подарок "${g.name}" отправлен ${recipientName}! ✓`);
   goBack();
 };
+
+// ── GIFT NOTIFICATION ─────────────────────────────────────────────
+function showGiftNotification(n, cat){
+  // Remove existing gift notif
+  const existing=document.getElementById('gift-notif-banner');
+  if(existing)existing.remove();
+  const banner=document.createElement('div');
+  banner.id='gift-notif-banner';
+  const miniSvg=cat&&cat.svg&&!cat.svg.startsWith('🎁')?
+    `<div style="width:32px;height:32px;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3))">${cat.svg.replace('64px;height:64px','32px;height:32px')}</div>`
+    :`<span style="font-size:24px">🎁</span>`;
+  banner.innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;flex:1">
+      ${miniSvg}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:800;color:#7c2d12;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+          <span style="color:#92400e">${esc(n.fromName||n.from)}</span> подарил подарок
+        </div>
+        <div style="font-size:12px;color:#78350f;margin-top:2px">
+          «${esc(n.giftName)}» для <span style="font-weight:700">@${ME}</span> · ${n.price} Mycoins
+        </div>
+      </div>
+    </div>
+    <button onclick="document.getElementById('gift-notif-banner').remove()" style="background:none;border:none;padding:4px;cursor:pointer;color:#92400e;font-size:18px;flex-shrink:0">✕</button>`;
+  banner.style.cssText=`
+    position:fixed;top:60px;left:50%;transform:translateX(-50%);
+    background:linear-gradient(135deg,#fef9c3,#fde68a);
+    border:2px solid #f59e0b;border-radius:16px;
+    padding:12px 14px;max-width:340px;width:calc(100% - 32px);
+    display:flex;align-items:center;gap:8px;
+    box-shadow:0 4px 20px rgba(245,158,11,.4),0 0 0 1px rgba(255,215,0,.3);
+    z-index:9000;animation:slideDown .35s ease`;
+  document.body.appendChild(banner);
+  setTimeout(()=>{if(banner.parentNode)banner.style.opacity='0';setTimeout(()=>banner.remove(),400);},6000);
+}
 
 // Load gifts for a user's profile
 async function loadUserGifts(un){
