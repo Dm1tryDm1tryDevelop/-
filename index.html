@@ -20,13 +20,14 @@
   --s1:0 1px 4px rgba(0,0,0,.07);
   --s2:0 4px 20px rgba(0,0,0,.10);
   --s3:0 8px 40px rgba(0,0,0,.18);
+  --radius:18px;
 }
 [data-theme="dark"]{
-  --bg:#17212b;--bg2:#0e1621;--bg3:#242f3d;
-  --border:#2b3a4a;--border2:#3d5166;
-  --text:#e8eaf6;--t2:#8ea5b8;--t3:#607080;--t4:#4a6070;
-  --out:#2b5278;--in:#242f3d;--blue3:#1a3a5c;--blue4:#1a3050;
-  --chat-bg:#0e1621;
+  --bg:#0f1923;--bg2:#151f2e;--bg3:#1c2a3a;
+  --border:#1e2d3d;--border2:#2a3f55;
+  --text:#dde8f5;--t2:#7a99b5;--t3:#4a6880;--t4:#2e4a60;
+  --out:#1a3a5c;--in:#1c2a3a;--blue3:#0e2040;--blue4:#0a1830;
+  --chat-bg:#0a1420;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;height:100dvh;overflow:hidden;background:var(--bg)}
@@ -69,16 +70,19 @@ body{font-family:'Inter',sans-serif;color:var(--text);position:fixed;inset:0}
 .screen.behind{transform:translateX(-28%);pointer-events:none;opacity:.5}
 
 /* ═══ AUTH ══════════════════════════════════════ */
-#s-auth{background:linear-gradient(155deg,#0f7fc4,#2AABEE 55%,#5acff5);justify-content:flex-end;align-items:center}
+#s-auth{background:linear-gradient(160deg,#060d1f 0%,#0d1b3a 45%,color-mix(in srgb,var(--accent) 40%,#050d20) 100%);justify-content:flex-end;align-items:center}
 .auth-hero{position:absolute;top:0;left:0;right:0;display:flex;flex-direction:column;
   align-items:center;padding-top:max(50px,7dvh);animation:fadeDown .7s ease both}
-.auth-icon{width:90px;height:90px;background:rgba(255,255,255,.18);border-radius:26px;
+.auth-icon{width:90px;height:90px;background:rgba(255,255,255,.12);border-radius:26px;
+  backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,.2);
+  box-shadow:0 8px 32px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.2);
   display:flex;align-items:center;justify-content:center;margin-bottom:14px;
   border:2px solid rgba(255,255,255,.3);box-shadow:0 10px 36px rgba(0,0,0,.18)}
 .auth-icon svg{width:56px;height:56px}
 .auth-hero h1{color:#fff;font-size:30px;font-weight:800;letter-spacing:-.5px}
 .auth-hero p{color:rgba(255,255,255,.7);font-size:13px;margin-top:5px}
-.auth-card{background:var(--bg);border-radius:28px 28px 0 0;padding:28px 22px;
+.auth-card{background:var(--bg);border-radius:30px 30px 0 0;padding:28px 22px;
+  box-shadow:0 -8px 40px rgba(0,0,0,.3);
   width:100%;max-width:520px;animation:slideUp .44s ease both .1s;
   box-shadow:0 -12px 50px rgba(0,0,0,.15);overflow-y:auto;
   max-height:78dvh;padding-bottom:max(36px,var(--bs))}
@@ -99,16 +103,18 @@ body{font-family:'Inter',sans-serif;color:var(--text);position:fixed;inset:0}
 .btn{padding:13px 18px;border-radius:13px;border:none;font-family:'Inter',sans-serif;
   font-size:15px;font-weight:600;cursor:pointer;transition:all .18s;
   display:flex;align-items:center;justify-content:center;gap:8px}
-.btn.pr{background:var(--blue);color:#fff;box-shadow:0 4px 16px rgba(42,171,238,.38)}
-.btn.pr:active{transform:scale(.97);background:var(--blue2)}
+.btn.pr{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 16px color-mix(in srgb,var(--accent) 38%,transparent)}
+.btn.pr:active{transform:scale(.97);opacity:.9}
 .btn.gh{background:var(--bg2);color:var(--t2)}
 .btn.gh:active{background:var(--bg3)}
 .btn.dn{background:var(--red2);color:var(--red)}
 .btn.sm{padding:8px 14px;font-size:13px;border-radius:10px}
 
 /* ═══ HEADER ════════════════════════════════════ */
-.hdr{height:var(--hh);background:var(--blue);display:flex;align-items:center;
-  padding:0 8px 0 4px;flex-shrink:0;z-index:10;box-shadow:0 2px 20px rgba(0,0,0,.15)}
+.hdr{height:var(--hh);background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);
+  display:flex;align-items:center;
+  padding:0 8px 0 4px;
+  box-shadow:0 2px 20px color-mix(in srgb,var(--accent) 40%,transparent);flex-shrink:0;z-index:10;box-shadow:0 2px 20px rgba(0,0,0,.15)}
 .hbtn{width:46px;height:46px;background:none;border:none;border-radius:50%;
   display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;
   flex-shrink:0;transition:background .15s}
@@ -188,7 +194,7 @@ body{font-family:'Inter',sans-serif;color:var(--text);position:fixed;inset:0}
 .mw.in.grp{flex-direction:row;align-items:flex-end;gap:6px;max-width:85%}
 .mw.in.grp .mbody{display:flex;flex-direction:column;align-items:flex-start;max-width:100%}
 .msender{font-size:12.5px;font-weight:700;margin-bottom:3px;padding:0 4px}
-.mb{padding:9px 13px 7px;border-radius:18px;word-break:break-word;box-shadow:var(--s1)}
+.mb{padding:10px 14px 8px;border-radius:20px;word-break:break-word;box-shadow:var(--s1)}
 .mw.out .mb{background:var(--out);border-bottom-right-radius:4px}
 .mw.in .mb{background:var(--in);border-bottom-left-radius:4px}
 .mtext{font-size:14.5px;line-height:1.55;color:var(--text);user-select:text;white-space:pre-wrap}
@@ -360,9 +366,9 @@ body{font-family:'Inter',sans-serif;color:var(--text);position:fixed;inset:0}
   padding:0;transition:color .15s}
 .attachbtn:active{color:var(--blue)}
 .attachbtn svg{width:22px;height:22px}
-.sendbtn{width:48px;height:48px;background:var(--blue);border:none;border-radius:50%;
+.sendbtn{width:48px;height:48px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:50%;
   display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;
-  flex-shrink:0;box-shadow:0 4px 14px rgba(42,171,238,.48);transition:all .15s}
+  flex-shrink:0;box-shadow:0 4px 16px color-mix(in srgb,var(--accent) 45%,transparent),0 4px 14px rgba(42,171,238,.48);transition:all .15s}
 .sendbtn:active{transform:scale(.9);background:var(--blue2)}
 .sendbtn svg{width:22px;height:22px}
 
@@ -433,11 +439,11 @@ body{font-family:'Inter',sans-serif;color:var(--text);position:fixed;inset:0}
 .sun{font-size:13px;color:var(--t2);font-weight:500}
 .sbio{font-size:13px;color:var(--t2);text-align:center;max-width:260px}
 .ssec{padding:18px 14px 6px}
-.ssec-title{font-size:11px;font-weight:800;color:var(--blue);text-transform:uppercase;
+.ssec-title{font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;
   letter-spacing:.8px;margin-bottom:9px;padding:0 3px}
-.scard{background:var(--bg);border-radius:16px;border:1.5px solid var(--border);
+.scard{background:var(--bg);border-radius:20px;border:1.5px solid var(--border);
   overflow:hidden;box-shadow:var(--s1)}
-.srow{display:flex;align-items:center;padding:14px 16px;gap:12px;
+.srow{display:flex;align-items:center;padding:15px 16px;gap:12px;
   border-bottom:1.5px solid var(--border);cursor:pointer;transition:background .12s}
 .srow:last-child{border-bottom:none}
 .srow:active{background:var(--bg2)}
@@ -463,7 +469,7 @@ body{font-family:'Inter',sans-serif;color:var(--text);position:fixed;inset:0}
 .toggle.on::after{transform:translateX(22px)}
 
 /* ═══ WALLPAPER ══════════════════════════════════ */
-.wp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:4px 0 16px}
+.wp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:4px 14px 8px;16px}
 .wp-item{aspect-ratio:9/16;border-radius:14px;overflow:hidden;cursor:pointer;
   border:3px solid transparent;transition:all .2s;position:relative;box-shadow:var(--s1)}
 .wp-item.sel{border-color:var(--blue);box-shadow:0 0 0 3px rgba(42,171,238,.3)}
@@ -517,8 +523,8 @@ body{font-family:'Inter',sans-serif;color:var(--text);position:fixed;inset:0}
 
 /* ═══ PROFILE ════════════════════════════════════ */
 #s-profile .body{flex:1;overflow-y:auto}
-.prof-hero{background:linear-gradient(180deg,var(--blue) 0%,var(--blue2) 100%);
-  padding:24px 20px 20px;display:flex;align-items:flex-end;gap:16px;min-height:175px}
+.prof-hero{background:linear-gradient(160deg,var(--accent) 0%,color-mix(in srgb,var(--accent) 60%,#000) 100%);
+  padding:28px 20px 20px;display:flex;align-items:flex-end;gap:16px;min-height:175px}
 .prof-av{width:80px;height:80px;border-radius:50%;overflow:hidden;flex-shrink:0;
   border:3px solid rgba(255,255,255,.45);box-shadow:0 4px 16px rgba(0,0,0,.2)}
 .prof-av img,.prof-av div{width:100%;height:100%;object-fit:cover;display:flex;
@@ -643,7 +649,7 @@ body{font-family:'Inter',sans-serif;color:var(--text);position:fixed;inset:0}
 .task-claim:active{transform:scale(.93)}
 .task-claimed{color:var(--green);font-size:12px;font-weight:700}
 /* Gifts */
-.gift-item{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;
+.gift-item{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:transform .15s,box-shadow .15s;
   padding:16px 10px;border-radius:20px;border:2px solid var(--border);transition:all .22s;background:var(--bg2);box-shadow:0 2px 10px rgba(0,0,0,.08)}
 .gift-item:active{transform:scale(.95)}
 .gift-item.sel{border-color:var(--blue);background:var(--blue3);box-shadow:0 0 0 3px rgba(42,171,238,.18)}
@@ -765,7 +771,7 @@ input:-webkit-autofill{-webkit-box-shadow:0 0 0 100px var(--bg) inset!important;
 <!-- CHAT LIST -->
 <div id="s-list" class="screen hidden">
   <div class="hdr">
-    <div class="htitle" style="padding-left:8px">MyMessend</div>
+    <div class="htitle" style="padding-left:8px;font-size:20px;font-weight:900;letter-spacing:-.3px">MyMessend</div>
     <button class="hbtn" onclick="openGSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
     <button class="hbtn" onclick="goSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   </div>
@@ -839,17 +845,17 @@ input:-webkit-autofill{-webkit-box-shadow:0 0 0 100px var(--bg) inset!important;
 <div id="s-sett" class="screen hidden">
   <div class="hdr"><button class="hbtn" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button><div class="htitle">Настройки</div></div>
   <div class="body">
-    <div class="sprof">
+    <div class="sprof" style="background:linear-gradient(160deg,var(--accent) 0%,color-mix(in srgb,var(--accent) 55%,#000) 100%);padding:30px 20px 24px">
       <div class="sav-wrap" onclick="document.getElementById('av-pick').click()">
-        <div class="sav" id="s-av"></div>
+        <div class="sav" id="s-av" style="box-shadow:0 0 0 3px rgba(255,255,255,.3),0 8px 24px rgba(0,0,0,.4)"></div>
         <div class="sav-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
       </div>
-      <div class="sname" id="s-name-disp"></div>
-      <div class="sun" id="s-un-disp"></div>
-      <div class="sbio" id="s-bio-disp"></div>
-      <div class="coins-badge" id="s-coins-disp" style="margin-top:6px">
-        <svg viewBox="0 0 24 24" fill="#b45309" stroke="none"><circle cx="12" cy="12" r="10"/><text x="12" y="16" text-anchor="middle" font-size="11" font-weight="900" fill="#fef3c7">M</text></svg>
-        <span>0 Mycoins</span>
+      <div class="sname" id="s-name-disp" style="color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.3)"></div>
+      <div class="sun" id="s-un-disp" style="color:rgba(255,255,255,.75)"></div>
+      <div class="sbio" id="s-bio-disp" style="color:rgba(255,255,255,.6)"></div>
+      <div class="coins-badge" id="s-coins-disp" style="margin-top:8px;background:rgba(0,0,0,.25);border-radius:20px;padding:5px 14px;border:1px solid rgba(255,255,255,.2)">
+        <svg viewBox="0 0 24 24" fill="#fbbf24" stroke="none"><circle cx="12" cy="12" r="10"/><text x="12" y="16" text-anchor="middle" font-size="11" font-weight="900" fill="#1a0a00">M</text></svg>
+        <span style="color:#fff;font-weight:700">0 Mycoins</span>
       </div>
     </div>
     <div class="ssec"><div class="ssec-title">Профиль</div><div class="scard">
@@ -896,11 +902,16 @@ input:-webkit-autofill{-webkit-box-shadow:0 0 0 100px var(--bg) inset!important;
 <div id="s-profile" class="screen hidden">
   <div class="hdr"><button class="hbtn" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button><div class="htitle">Профиль</div></div>
   <div class="body">
-    <div class="prof-hero">
-      <div class="prof-av" id="prof-av"></div>
-      <div><div class="prof-name" id="prof-name"></div><div class="prof-un" id="prof-un"></div><div id="prof-dev-badge"></div><div class="prof-status" id="prof-status"></div></div>
+    <div class="prof-hero" style="flex-direction:column;align-items:center;text-align:center;padding:32px 20px 24px;gap:12px">
+      <div class="prof-av" id="prof-av" style="width:88px;height:88px;font-size:34px;box-shadow:0 0 0 4px rgba(255,255,255,.25),0 8px 30px rgba(0,0,0,.4)"></div>
+      <div>
+        <div class="prof-name" id="prof-name" style="font-size:22px;font-weight:800;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.3)"></div>
+        <div class="prof-un" id="prof-un" style="color:rgba(255,255,255,.7);font-size:14px;margin-top:2px"></div>
+        <div id="prof-dev-badge" style="margin-top:6px"></div>
+        <div class="prof-status" id="prof-status" style="margin-top:4px"></div>
+      </div>
     </div>
-    <div class="prof-actions" id="prof-actions"></div>
+    <div class="prof-actions" id="prof-actions" style="padding:0 14px;margin-top:-8px;gap:10px"></div>
     <div class="prof-bio-sec" id="prof-bio-sec" style="display:none"><div class="prof-bio-title">О себе</div><div class="prof-bio-text" id="prof-bio"></div></div>
     <div class="ssec" style="padding-top:4px"><div class="ssec-title" style="padding:12px 14px 4px">Подарки</div><div class="gift-showcase" id="prof-gifts-showcase"><div style="font-size:12px;color:var(--t2)">Загрузка…</div></div></div>
     <div class="ssec" style="padding-top:4px"><div class="scard" id="prof-info-card"></div></div>
@@ -925,16 +936,25 @@ input:-webkit-autofill{-webkit-box-shadow:0 0 0 100px var(--bg) inset!important;
 
 <!-- WALLPAPER -->
 <div id="s-wp" class="screen hidden">
-  <div class="hdr"><button class="hbtn" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button><div class="htitle">Обои</div></div>
-  <div class="body" style="padding:16px;overflow-y:auto">
-    <p style="font-size:13px;color:var(--t2);margin-bottom:14px">Выберите готовый фон или загрузите своё фото.</p>
-    <button class="btn gh" style="width:100%;margin-bottom:14px" onclick="document.getElementById('wp-pick').click()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      Загрузить фото
-    </button>
+  <div class="hdr"><button class="hbtn" onclick="goBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button><div class="htitle">Обои чатов</div></div>
+  <div class="body" style="overflow-y:auto">
+    <div style="padding:14px 14px 0">
+      <button class="btn gh" style="width:100%;border-radius:14px;gap:8px" onclick="document.getElementById('wp-pick').click()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Загрузить своё фото
+      </button>
+    </div>
     <input type="file" id="wp-pick" accept="image/*" style="display:none" onchange="uploadWallpaper(this)">
-    <div class="wp-grid" id="wp-grid"></div>
-    <button class="btn dn" style="width:100%;margin-bottom:30px" onclick="clearWallpaper()">Убрать обои</button>
+    <div style="padding:16px 14px 4px;font-size:11px;font-weight:800;color:var(--accent);letter-spacing:.08em;text-transform:uppercase">Тёмные</div>
+    <div class="wp-grid" id="wp-grid-dark"></div>
+    <div style="padding:12px 14px 4px;font-size:11px;font-weight:800;color:var(--accent);letter-spacing:.08em;text-transform:uppercase">Яркие</div>
+    <div class="wp-grid" id="wp-grid-bright"></div>
+    <div style="padding:12px 14px 4px;font-size:11px;font-weight:800;color:var(--accent);letter-spacing:.08em;text-transform:uppercase">Пастельные / Светлые</div>
+    <div class="wp-grid" id="wp-grid-light"></div>
+    <div style="padding:12px 14px">
+      <button class="btn dn" style="width:100%;border-radius:14px" onclick="clearWallpaper()">✕ Убрать обои</button>
+    </div>
+    <div style="height:30px"></div>
   </div>
 </div>
 
@@ -1045,15 +1065,28 @@ const db=getDatabase(app);
 // ── CONSTANTS ──────────────────────────────────────────────────────
 const COLORS=['#E91E63','#9C27B0','#3F51B5','#2196F3','#009688','#4CAF50','#FF9800','#FF5722','#00BCD4','#607D8B'];
 const WALLPAPERS=[
-  {id:'w1',css:'linear-gradient(135deg,#e0f2fe,#bae6fd,#e0f7fa)'},
-  {id:'w2',css:'linear-gradient(135deg,#fce7f3,#f3e8ff,#e0e7ff)'},
-  {id:'w3',css:'linear-gradient(135deg,#dcfce7,#d1fae5,#ecfdf5)'},
-  {id:'w4',css:'linear-gradient(135deg,#fef9c3,#fef3c7,#ffedd5)'},
-  {id:'w5',css:'linear-gradient(135deg,#1e293b,#0f172a,#1e293b)'},
-  {id:'w6',css:'linear-gradient(135deg,#ff6b6b,#feca57,#48dbfb)'},
-  {id:'w7',css:'linear-gradient(160deg,#a8edea,#fed6e3)'},
-  {id:'w8',css:'linear-gradient(135deg,#667eea,#764ba2)'},
-  {id:'w9',css:'linear-gradient(135deg,#f093fb,#f5576c)'},
+  // ── Тёмные ──
+  {id:'midnight', name:'Полночь',   css:'linear-gradient(160deg,#0a0e1a 0%,#0d1b2e 40%,#0a1428 100%)'},
+  {id:'abyss',    name:'Бездна',    css:'linear-gradient(160deg,#050010 0%,#0d0028 50%,#1a0040 100%)'},
+  {id:'obsidian', name:'Обсидиан',  css:'linear-gradient(135deg,#0d0d0d 0%,#1a1a2e 50%,#16213e 100%)'},
+  {id:'forest',   name:'Лес ночью', css:'linear-gradient(160deg,#020d08 0%,#0a1f0e 50%,#051510 100%)'},
+  {id:'deep_sea', name:'Глубина',   css:'linear-gradient(180deg,#020b18 0%,#041525 40%,#061e35 100%)'},
+  // ── Закаты / неоны ──
+  {id:'aurora',   name:'Аврора',    css:'linear-gradient(135deg,#0f2027 0%,#203a43 50%,#2c5364 100%)'},
+  {id:'sunset',   name:'Закат',     css:'linear-gradient(135deg,#1a001e 0%,#3d0030 35%,#8b0050 65%,#ff4500 100%)'},
+  {id:'neon',     name:'Неон',      css:'linear-gradient(135deg,#0d001a 0%,#1a0033 40%,#00001a 70%,#001a0d 100%)'},
+  {id:'cyberpunk',name:'Киберпанк', css:'linear-gradient(135deg,#1a0533 0%,#0d1b00 45%,#001433 70%,#1a0533 100%)'},
+  {id:'galaxy',   name:'Галактика', css:'radial-gradient(ellipse at 20% 30%,#1a004d 0%,#050015 40%,#00001a 70%,#001a2e 100%)'},
+  // ── Пастель / светлые ──
+  {id:'cotton',   name:'Хлопок',    css:'linear-gradient(135deg,#ffecd2 0%,#fcb69f 50%,#ffecd2 100%)'},
+  {id:'sakura',   name:'Сакура',    css:'linear-gradient(135deg,#fbc2eb 0%,#a6c1ee 50%,#fbc2eb 100%)'},
+  {id:'mint',     name:'Мята',      css:'linear-gradient(135deg,#d4fc79 0%,#96e6a1 50%,#81ecec 100%)'},
+  {id:'peach',    name:'Персик',    css:'linear-gradient(135deg,#ffeaa7 0%,#fab1a0 50%,#ff7675 100%)'},
+  {id:'sky',      name:'Небо',      css:'linear-gradient(180deg,#c2e9fb 0%,#a1c4fd 50%,#e0c3fc 100%)'},
+  // ── Яркие ──
+  {id:'fire',     name:'Огонь',     css:'linear-gradient(135deg,#1a0000 0%,#5c0000 30%,#ff3300 60%,#ff8800 100%)'},
+  {id:'ocean',    name:'Океан',     css:'linear-gradient(135deg,#001a2e 0%,#003d66 40%,#0066cc 70%,#00aaff 100%)'},
+  {id:'emerald',  name:'Изумруд',   css:'linear-gradient(135deg,#001a0d 0%,#00401e 40%,#00802d 70%,#00cc44 100%)'},
 ];
 
 // All emojis used in both ctx-panel reaction strip AND emoji input panel
@@ -1104,13 +1137,18 @@ function chatStatus(c){if(!c)return'';if(c.type==='group'){const tot=Object.keys
 
 // ── ACCENT & FONT COLOR PRESETS ────────────────────────────────────
 const ACCENT_PRESETS=[
-  {id:'blue',  main:'#2AABEE',dark:'#1a96d4',light:'#e8f5fd',lite:'#cde9f9',name:'Синий'},
-  {id:'orange',main:'#f97316',dark:'#ea6306',light:'#fff7ed',lite:'#fed7aa',name:'Оранжевый'},
-  {id:'violet',main:'#8b5cf6',dark:'#7c3aed',light:'#f5f3ff',lite:'#ddd6fe',name:'Фиолетовый'},
-  {id:'red',   main:'#ef4444',dark:'#dc2626',light:'#fef2f2',lite:'#fecaca',name:'Красный'},
-  {id:'black', main:'#1f2937',dark:'#111827',light:'#f3f4f6',lite:'#d1d5db',name:'Чёрный'},
-  {id:'green', main:'#10b981',dark:'#059669',light:'#ecfdf5',lite:'#a7f3d0',name:'Зелёный'},
-  {id:'pink',  main:'#ec4899',dark:'#db2777',light:'#fdf2f8',lite:'#fbcfe8',name:'Розовый'},
+  {id:'blue',    main:'#2AABEE',dark:'#1a96d4',light:'#e8f5fd',lite:'#cde9f9',name:'Синий'},
+  {id:'violet',  main:'#8b5cf6',dark:'#7c3aed',light:'#f5f3ff',lite:'#ddd6fe',name:'Фиолетовый'},
+  {id:'purple',  main:'#a855f7',dark:'#9333ea',light:'#faf5ff',lite:'#e9d5ff',name:'Пурпурный'},
+  {id:'pink',    main:'#ec4899',dark:'#db2777',light:'#fdf2f8',lite:'#fbcfe8',name:'Розовый'},
+  {id:'red',     main:'#ef4444',dark:'#dc2626',light:'#fef2f2',lite:'#fecaca',name:'Красный'},
+  {id:'orange',  main:'#f97316',dark:'#ea6306',light:'#fff7ed',lite:'#fed7aa',name:'Оранжевый'},
+  {id:'amber',   main:'#f59e0b',dark:'#d97706',light:'#fffbeb',lite:'#fde68a',name:'Янтарный'},
+  {id:'green',   main:'#10b981',dark:'#059669',light:'#ecfdf5',lite:'#a7f3d0',name:'Зелёный'},
+  {id:'teal',    main:'#14b8a6',dark:'#0d9488',light:'#f0fdfa',lite:'#99f6e4',name:'Бирюзовый'},
+  {id:'cyan',    main:'#06b6d4',dark:'#0891b2',light:'#ecfeff',lite:'#a5f3fc',name:'Голубой'},
+  {id:'indigo',  main:'#6366f1',dark:'#4f46e5',light:'#eef2ff',lite:'#c7d2fe',name:'Индиго'},
+  {id:'black',   main:'#1f2937',dark:'#111827',light:'#f3f4f6',lite:'#d1d5db',name:'Тёмный'},
 ];
 const FONT_PRESETS=[
   {id:'dark',   color:'#0d0d0d', bg:'#0d0d0d', name:'Чёрный'},
@@ -2144,7 +2182,24 @@ window.toggleNotifications=function(){settings.notifications=!settings.notificat
 window.toggleSounds=function(){settings.sounds=!settings.sounds;saveSettings();applySettings();};
 
 // ── WALLPAPER ──────────────────────────────────────────────────────
-function buildWpGrid(){const grid=document.getElementById('wp-grid');if(!grid)return;grid.innerHTML=WALLPAPERS.map(wp=>`<div class="wp-item${settings.wallpaper===wp.css?' sel':''}" onclick="selectWallpaper('${wp.css}','gradient')"><div style="width:100%;height:100%;background:${wp.css}"></div></div>`).join('');}
+function buildWpGrid(){
+  const DARK_IDS=['midnight','abyss','obsidian','forest','deep_sea'];
+  const BRIGHT_IDS=['aurora','sunset','neon','cyberpunk','galaxy','fire','ocean','emerald'];
+  const LIGHT_IDS=['cotton','sakura','mint','peach','sky'];
+  function renderGroup(gridId,ids){
+    const grid=document.getElementById(gridId);if(!grid)return;
+    const wps=WALLPAPERS.filter(w=>ids.includes(w.id));
+    grid.innerHTML=wps.map(wp=>`
+      <div class="wp-item${settings.wallpaper===wp.css?' sel':''}" onclick="selectWallpaper('${wp.css}','gradient')">
+        <div style="width:100%;height:100%;background:${wp.css}"></div>
+        <div class="wp-label">${wp.name||''}</div>
+        ${settings.wallpaper===wp.css?'<div class="wp-check">✓</div>':''}
+      </div>`).join('');
+  }
+  renderGroup('wp-grid-dark',DARK_IDS);
+  renderGroup('wp-grid-bright',BRIGHT_IDS);
+  renderGroup('wp-grid-light',LIGHT_IDS);
+}
 window.selectWallpaper=function(wp,type){settings.wallpaper=wp;settings.wallpaperType=type;saveSettings();applyWallpaper();buildWpGrid();showToast('Обои установлены ✓');playClickSound();};
 window.clearWallpaper=function(){settings.wallpaper=null;settings.wallpaperType='default';saveSettings();applyWallpaper();buildWpGrid();showToast('Обои убраны');};
 window.uploadWallpaper=function(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{selectWallpaper(e.target.result,'image');};reader.readAsDataURL(file);input.value='';};
