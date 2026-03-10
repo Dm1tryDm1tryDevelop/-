@@ -703,11 +703,11 @@ body{font-family:'Inter',sans-serif;color:var(--text);position:fixed;inset:0}
 .gift-visual svg{width:68px;height:68px}
 @keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 @keyframes giftGalaxy{
-  0%  {transform:scale(1)    rotate(0deg)  drop-shadow(0 0 6px #00E5FF)}
-  25% {transform:scale(1.18) rotate(15deg) drop-shadow(0 0 18px #7C4DFF)}
-  50% {transform:scale(1.08) rotate(0deg)  drop-shadow(0 0 28px #00E5FF) brightness(1.3)}
-  75% {transform:scale(1.18) rotate(-15deg)drop-shadow(0 0 18px #ff00cc)}
-  100%{transform:scale(1)    rotate(0deg)  drop-shadow(0 0 6px #00E5FF)}
+  0%  {transform:scale(1)    rotate(0deg);   filter:drop-shadow(0 0 6px #00E5FF)}
+  25% {transform:scale(1.2)  rotate(15deg);  filter:drop-shadow(0 0 18px #7C4DFF)}
+  50% {transform:scale(1.1)  rotate(0deg);   filter:drop-shadow(0 0 28px #00E5FF) brightness(1.4)}
+  75% {transform:scale(1.2)  rotate(-15deg); filter:drop-shadow(0 0 18px #ff00cc)}
+  100%{transform:scale(1)    rotate(0deg);   filter:drop-shadow(0 0 6px #00E5FF)}
 }
 @keyframes giftFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @keyframes giftSpinY{0%,100%{transform:rotateY(0) scale(1)}50%{transform:rotateY(180deg) scale(1.08)}}
@@ -1422,6 +1422,7 @@ function enterApp(){
   subscribeGlobal();heartbeat();initEmojiPanel();buildWpGrid();applySettings();loadCoins();updateCoinsDisplay();
   ensureBotChat();
   initPush();
+  _setupScrollListener();
   // Apply accent/font from user profile once users load
   setTimeout(async()=>{
     const snap=await get(ref(db,'users/'+ME));if(!snap.exists())return;
@@ -1500,9 +1501,6 @@ async function sendPushToUser(toUsername,title,body,chatId){
     await set(nr,{to:toUsername,title,body,chatId,ts:Date.now(),sent:false});
   }catch{}
 }
-
-// Init global scroll listener once
-_setupScrollListener();
 
 function heartbeat(){if(!ME)return;update(ref(db,'users/'+ME),{online:true,lastSeen:Date.now()});setTimeout(heartbeat,25000);}
 window.addEventListener('beforeunload',()=>{if(ME)update(ref(db,'users/'+ME),{online:false,lastSeen:Date.now()});});
@@ -2793,11 +2791,16 @@ function makeGiftEl(id, size){
   const g=GIFT_CATALOG.find(x=>x.id===id)||GIFT_CATALOG[0];
   const wrap=document.createElement('div');
   const fontSize=Math.round(size*.55);
+  const anim=GIFT_ANIMS[id]||'animation:giftFloat 2s ease-in-out infinite';
   wrap.style.cssText=`width:${size}px;height:${size}px;border-radius:${Math.round(size*.22)}px;`+
     `background:${g.bg};display:flex;align-items:center;justify-content:center;`+
     `font-size:${fontSize}px;line-height:1;box-shadow:0 0 ${size*.18}px ${g.color}55,inset 0 1px 0 rgba(255,255,255,.12);`+
     `border:1.5px solid ${g.color}44;flex-shrink:0;`;
-  wrap.textContent=g.emoji;
+  // Apply animation to the emoji span so it animates independently
+  const span=document.createElement('span');
+  span.style.cssText=`display:inline-block;${anim};`;
+  span.textContent=g.emoji;
+  wrap.appendChild(span);
   return wrap;
 }
 // Legacy alias kept for grid/select usage
