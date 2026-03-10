@@ -597,8 +597,8 @@ body{font-family:'Inter',sans-serif;color:var(--text);position:fixed;inset:0}
 /* Profile gifts display */
 .gift-showcase{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 14px}
 .gift-bubble-icon{width:54px;height:54px;flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;filter:drop-shadow(0 3px 10px rgba(0,0,0,.32));transition:transform .15s}
-.gift-bubble-icon:active{transform:scale(.9)}
-.gift-bubble-icon svg{width:54px!important;height:54px!important}
+.gift-bubble-icon:active{transform:scale(.88)}
+.gift-bubble-icon canvas,.gift-bubble-icon svg{width:54px!important;height:54px!important;display:block}
 .gift-bubble{background:var(--bg2);border-radius:16px;padding:12px 8px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;border:1.5px solid var(--border);
   align-items:center;gap:8px;border:1.5px solid var(--border);animation:giftPop .3s ease}
 @keyframes giftPop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
@@ -1094,7 +1094,13 @@ window.goBack=function(){
   const prev=screenStack[screenStack.length-1]||'s-list';
   document.querySelectorAll('.screen').forEach(s=>{s.classList.add('hidden');s.classList.remove('behind');});
   document.getElementById(prev)?.classList.remove('hidden');
-  if(prev==='s-list')renderChatList();
+  if(prev==='s-list'){
+    // Re-subscribe to unread for the chat we just left
+    if(curChatId&&!perChatUnsubs[curChatId]){
+      subscribeUnread(curChatId);
+    }
+    renderChatList();
+  }
 };
 
 // ── SOUNDS ─────────────────────────────────────────────────────────
@@ -1363,6 +1369,8 @@ window.openChat=function(chatId){
   curChatId=chatId;cancelReply();cancelEdit();
   readState[chatId]=Date.now();saveReadState();
   UNREAD_CACHE[chatId]=0;renderChatList();
+  // Cancel per-chat unread subscription — subscribeMessages handles active chat
+  if(perChatUnsubs[chatId]){try{perChatUnsubs[chatId]();}catch{}delete perChatUnsubs[chatId];}
   markChatRead(chatId);
   updateChatHeader();subscribeMessages(chatId);applyWallpaper();
   // Restore draft
@@ -1817,14 +1825,13 @@ window.openUserProfile=function(un){
       if(cat&&cat.svg){
         const wrap=document.createElement('div');
         wrap.className='gift-bubble-icon';
-        // Static by default, animate on hover/click
-        wrap.innerHTML=cat.svg;
-        const svgEl=wrap.querySelector('svg');
-        if(svgEl){svgEl.style.width='54px';svgEl.style.height='54px';}
-        // Animate on click
+        // Use canvas render for guaranteed display
+        const cvs=makeSvgCanvas(cat.svg,54,null);
+        wrap.appendChild(cvs);
+        // Tap to animate
         wrap.addEventListener('click',function(){
-          this.style.cssText=anim;
-          setTimeout(()=>{this.style.cssText='';},3000);
+          wrap.style.cssText=anim;
+          setTimeout(()=>{wrap.style.cssText='';},2500);
         });
         card.appendChild(wrap);
       }
@@ -2075,11 +2082,20 @@ window.confirmDeleteDM=function(){
 };
 window.deleteDMConfirmed=async function(){
   dismissCtx();if(!curChatId)return;
+  const cid=curChatId;
   try{
-    await remove(ref(db,'messages/'+curChatId));
-    await remove(ref(db,'chats/'+curChatId));
-    goBack();curChatId=null;renderChatList();showToast('Чат удалён');
-  }catch(e){showToast('Ошибка удаления');}
+    // Unsubscribe from this chat's messages
+    if(perChatUnsubs[cid]){try{perChatUnsubs[cid]();}catch{}delete perChatUnsubs[cid];}
+    delete UNREAD_CACHE[cid];
+    delete ALL_CHATS[cid];
+    if(msgsUnsub){try{msgsUnsub();}catch{}msgsUnsub=null;}
+    curChatId=null;
+    goBack();renderChatList();
+    // Delete from Firebase in background
+    remove(ref(db,'messages/'+cid)).catch(()=>{});
+    remove(ref(db,'chats/'+cid)).catch(()=>{});
+    showToast('Чат удалён');
+  }catch(e){showToast('Ошибка удаления: '+e.message);}
 };
 
 // ── VIDEO FULLSCREEN ────────────────────────────────────────────────
@@ -2329,12 +2345,10 @@ window.openGifts=function(targetUser){
     item.onclick=()=>selectGift(g.id);
     const visWrap=document.createElement('div');
     visWrap.className='gift-visual';
-    // Always animate in gift selection screen
     visWrap.style.cssText=anim;
     if(g.svg){
-      visWrap.innerHTML=g.svg;
-      const svgEl=visWrap.querySelector('svg');
-      if(svgEl){svgEl.style.width='68px';svgEl.style.height='68px';}
+      const cvs=makeSvgCanvas(g.svg,68,null);
+      visWrap.appendChild(cvs);
     }
     const nm=document.createElement('div');nm.className='gift-name';nm.textContent=g.name;
     const pr=document.createElement('div');pr.className='gift-price';pr.textContent=g.price+' 🪙';
@@ -2355,11 +2369,10 @@ window.selectGift=function(id){
   const selIco=document.getElementById('gift-sel-ico');
   selIco.innerHTML='';
   const swrap=document.createElement('div');
-  swrap.style.cssText='width:42px;height:42px;'+selAnim+';filter:drop-shadow(0 3px 10px rgba(0,0,0,.3))';
+  swrap.style.cssText='width:42px;height:42px;'+selAnim;
   if(g.svg){
-    swrap.innerHTML=g.svg;
-    const svgEl=swrap.querySelector('svg');
-    if(svgEl){svgEl.style.width='42px';svgEl.style.height='42px';}
+    const cvsSel=makeSvgCanvas(g.svg,42,null);
+    swrap.appendChild(cvsSel);
   }
   selIco.appendChild(swrap);
   document.getElementById('gift-sel-name').textContent=g.name;
@@ -2402,29 +2415,26 @@ function showGiftNotification(n, cat){
   if(existing)existing.remove();
   const banner=document.createElement('div');
   banner.id='gift-notif-banner';
-  let miniSvg='<span style="font-size:28px">🎁</span>';
+  const notifGiftWrap=document.createElement('div');
+  notifGiftWrap.style.cssText='width:40px;height:40px;flex-shrink:0;animation:giftFloat 2s ease-in-out infinite';
   if(cat&&cat.svg){
-    // Wrap SVG in div for animation
-    const tmpDiv=document.createElement('div');
-    tmpDiv.style.cssText='width:38px;height:38px;flex-shrink:0;animation:giftFloat 2s ease-in-out infinite;filter:drop-shadow(0 2px 8px rgba(0,0,0,.28))';
-    tmpDiv.innerHTML=cat.svg;
-    const svgN=tmpDiv.querySelector('svg');
-    if(svgN){svgN.style.width='38px';svgN.style.height='38px';}
-    miniSvg=tmpDiv.outerHTML;
+    const cvsN=makeSvgCanvas(cat.svg,40,null);
+    notifGiftWrap.appendChild(cvsN);
+  }else{
+    notifGiftWrap.textContent='🎁';
+    notifGiftWrap.style.fontSize='28px';
   }
-  banner.innerHTML=`
-    <div style="display:flex;align-items:center;gap:10px;flex:1">
-      ${miniSvg}
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:800;color:#7c2d12;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-          <span style="color:#92400e">${esc(n.fromName||n.from)}</span> подарил подарок
-        </div>
-        <div style="font-size:12px;color:#78350f;margin-top:2px">
-          «${esc(n.giftName)}» для <span style="font-weight:700">@${ME}</span> · ${n.price} Mycoins
-        </div>
-      </div>
-    </div>
-    <button onclick="document.getElementById('gift-notif-banner').remove()" style="background:none;border:none;padding:4px;cursor:pointer;color:#92400e;font-size:18px;flex-shrink:0">✕</button>`;
+  const bannerInner=document.createElement('div');
+  bannerInner.style.cssText='display:flex;align-items:center;gap:10px;flex:1';
+  bannerInner.appendChild(notifGiftWrap);
+  const bannerText=document.createElement('div');
+  bannerText.style.cssText='flex:1;min-width:0';
+  bannerText.innerHTML=`<div style="font-size:13px;font-weight:800;color:#7c2d12;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><span style="color:#92400e">${esc(n.fromName||n.from)}</span> подарил подарок</div><div style="font-size:12px;color:#78350f;margin-top:2px">«${esc(n.giftName)}» для <b>@${ME}</b> · ${n.price} Mycoins</div>`;
+  bannerInner.appendChild(bannerText);
+  const bannerClose=document.createElement('button');
+  bannerClose.textContent='✕';bannerClose.style.cssText='background:none;border:none;padding:4px;cursor:pointer;color:#92400e;font-size:18px;flex-shrink:0';
+  bannerClose.onclick=()=>banner.remove();
+  banner.appendChild(bannerInner);banner.appendChild(bannerClose);
   banner.style.cssText=`
     position:fixed;top:60px;left:50%;transform:translateX(-50%);
     background:linear-gradient(135deg,#fef9c3,#fde68a);
@@ -2438,6 +2448,43 @@ function showGiftNotification(n, cat){
 }
 
 // Load gifts for a user's profile
+// ── GIFT SVG RENDERER ─────────────────────────────────────────────
+// Renders SVG string onto a canvas element (most reliable cross-browser)
+function makeSvgCanvas(svgString, size, animCss){
+  const canvas = document.createElement('canvas');
+  canvas.width = size*2; canvas.height = size*2; // retina
+  canvas.style.cssText = 'width:'+size+'px;height:'+size+'px;display:block;image-rendering:crisp-edges';
+  // Make gradient IDs unique to avoid cross-card conflicts
+  const uid = Math.random().toString(36).slice(2,8);
+  const uniqueSvg = svgString
+    .replace(/id="g_/g, 'id="g'+uid+'_')
+    .replace(/url\(#g_/g, 'url(#g'+uid+'_');
+  // Use data URI (more compatible on mobile than Blob URL)
+  try{
+    const encoded = 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(uniqueSvg);
+    const img = new Image();
+    img.onload = function(){
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    };
+    img.onerror = function(){
+      // Fallback: draw colored circle with letter
+      const ctx=canvas.getContext('2d');
+      ctx.fillStyle='#2AABEE';ctx.beginPath();
+      ctx.arc(canvas.width/2,canvas.height/2,canvas.width/2,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#fff';ctx.font='bold '+(canvas.width*.5)+'px sans-serif';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('🎁',canvas.width/2,canvas.height/2);
+    };
+    img.src = encoded;
+  }catch(e){
+    const ctx=canvas.getContext('2d');
+    ctx.fillStyle='#1a96d4';ctx.fillRect(0,0,canvas.width,canvas.height);
+  }
+  return canvas;
+}
+
 async function loadUserGifts(un){
   try{
     const snap=await get(ref(db,'gifts/'+un));
