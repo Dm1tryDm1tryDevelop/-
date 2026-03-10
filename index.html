@@ -204,6 +204,49 @@ body{font-family:'Inter',sans-serif;color:var(--text);position:fixed;inset:0}
 .mtime{font-size:11px;color:var(--t3);flex-shrink:0}
 .edited-lbl{font-size:10px;color:var(--t3);font-style:italic}
 
+/* ── POLL ─────────────────────────────────────────────── */
+.poll-wrap{background:rgba(0,0,0,.18);border-radius:14px;padding:12px;min-width:220px;max-width:280px}
+.poll-q{font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px;line-height:1.35}
+.poll-opt{position:relative;border-radius:10px;overflow:hidden;margin-bottom:7px;cursor:pointer;user-select:none}
+.poll-opt-bg{position:absolute;left:0;top:0;height:100%;background:var(--accent);opacity:.22;border-radius:10px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.poll-opt-inner{position:relative;display:flex;align-items:center;gap:8px;padding:9px 12px}
+.poll-opt-check{width:18px;height:18px;border-radius:50%;border:2px solid var(--accent);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.poll-opt-check.on{background:var(--accent)}
+.poll-opt-text{flex:1;font-size:13px;color:var(--text)}
+.poll-opt-pct{font-size:12px;font-weight:700;color:var(--accent);min-width:30px;text-align:right}
+.poll-meta{font-size:11px;color:var(--t2);margin-top:8px}
+.poll-bar-modal{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:600;display:flex;align-items:flex-end;justify-content:center}
+.poll-modal{background:var(--bg);border-radius:24px 24px 0 0;padding:20px;width:100%;max-width:480px}
+.poll-modal-title{font-size:17px;font-weight:800;margin-bottom:14px}
+.poll-opt-inp{background:var(--bg2);border:1.5px solid var(--border);border-radius:12px;padding:10px 14px;font-size:14px;color:var(--text);width:100%;margin-bottom:8px;outline:none}
+.poll-opt-inp:focus{border-color:var(--accent)}
+
+/* ── PINNED ───────────────────────────────────────────── */
+.pin-bar{background:linear-gradient(90deg,var(--accent)18,transparent);border-left:3px solid var(--accent);padding:7px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;flex-shrink:0;animation:slideDown .3s ease}
+.pin-bar-ico{font-size:14px}
+.pin-bar-text{flex:1;font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pin-bar-close{background:none;border:none;color:var(--t2);font-size:16px;padding:2px 6px;cursor:pointer}
+
+/* ── BOT / TIC-TAC-TOE ───────────────────────────────── */
+.ttt-wrap{background:rgba(0,0,0,.2);border-radius:16px;padding:14px;min-width:240px}
+.ttt-title{font-size:13px;font-weight:700;color:var(--t2);margin-bottom:10px;text-align:center}
+.ttt-board{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.ttt-cell{aspect-ratio:1;background:rgba(255,255,255,.07);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;border:2px solid rgba(255,255,255,.1);transition:background .15s,transform .1s}
+.ttt-cell:hover{background:rgba(255,255,255,.13)}
+.ttt-cell:active{transform:scale(.9)}
+.ttt-cell.x{color:#FF6B6B;border-color:rgba(255,107,107,.4)}
+.ttt-cell.o{color:#69F0AE;border-color:rgba(105,240,174,.4)}
+.ttt-cell.win{background:rgba(255,215,0,.15);border-color:#FFD700}
+.ttt-status{text-align:center;font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.ttt-btn{width:100%;padding:9px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer}
+
+/* ── MESSAGE SEARCH ──────────────────────────────────── */
+.msgsearch-bar{background:var(--bg);border-bottom:1px solid var(--border);padding:8px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.msgsearch-inp{flex:1;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:7px 12px;font-size:14px;color:var(--text);outline:none}
+.msgsearch-inp:focus{border-color:var(--accent)}
+.msgsearch-count{font-size:12px;color:var(--t2);white-space:nowrap}
+.msg-highlight{background:rgba(255,215,0,.35)!important;border-radius:3px}
+
 /* ── TICKS:  1 grey tick = sent,  2 blue ticks = read ── */
 .chk{display:inline-flex;align-items:center;margin-left:2px;flex-shrink:0;vertical-align:middle}
 
@@ -735,6 +778,18 @@ input:-webkit-autofill{-webkit-box-shadow:0 0 0 100px var(--bg) inset!important;
     <button class="hbtn" onclick="openChatMenu()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
   </div>
   <div id="gbar" class="gbar" onclick="openChatInfo()"></div>
+  <div id="pin-bar" class="pin-bar" style="display:none" onclick="scrollToPinned()">
+    <span class="pin-bar-ico">📌</span>
+    <span class="pin-bar-text" id="pin-bar-text">Закреплённое сообщение</span>
+    <button class="pin-bar-close" onclick="event.stopPropagation();closePinBar()">✕</button>
+  </div>
+  <div id="msgsearch-bar" class="msgsearch-bar" style="display:none">
+    <button style="background:none;border:none;color:var(--t2);font-size:20px;cursor:pointer;padding:0 4px" onclick="closeMsgSearch()">✕</button>
+    <input class="msgsearch-inp" id="msgsearch-inp" placeholder="Поиск в чате…" oninput="onMsgSearch(this.value)">
+    <span class="msgsearch-count" id="msgsearch-count"></span>
+    <button style="background:none;border:none;color:var(--accent);font-size:18px;cursor:pointer;padding:0 4px" onclick="prevMsgResult()">↑</button>
+    <button style="background:none;border:none;color:var(--accent);font-size:18px;cursor:pointer;padding:0 4px" onclick="nextMsgResult()">↓</button>
+  </div>
   <div class="body chat-bg-default" id="msgs-body"></div>
   <div class="tbar" id="tbar"><div class="tdots"><span></span><span></span><span></span></div><span class="ttxt" id="ttxt"></span></div>
   <div class="bar" id="reply-bar">
@@ -1191,6 +1246,7 @@ function enterApp(){
   document.getElementById('s-list').classList.remove('hidden');
   try{const rs=localStorage.getItem('myx_read_'+ME);if(rs)readState=JSON.parse(rs);}catch{}
   subscribeGlobal();heartbeat();initEmojiPanel();buildWpGrid();applySettings();loadCoins();updateCoinsDisplay();
+  ensureBotChat();
   // Apply accent/font from user profile once users load
   setTimeout(async()=>{
     const snap=await get(ref(db,'users/'+ME));if(!snap.exists())return;
@@ -1375,6 +1431,7 @@ function renderChatList(filter=''){
   }).join('');
 }
 function buildListAv(chat,dot){
+  if(chat.type==='bot'){return`<div class="av" style="background:linear-gradient(135deg,#4a0080,#7C4DFF);position:relative;font-size:22px;display:flex;align-items:center;justify-content:center">${chat.botAvatar||'🤖'}</div>`;}
   if(chat.type==='group'){const s=chat.avatar?`<img src="${chat.avatar}" alt="">`:`<span>${ini(chat.name||'G')}</span>`;const bg=chat.avatar?'transparent':(chat.color||'#2196F3');return`<div class="av" style="background:${bg};position:relative">${s}</div>`;}
   const o=Object.keys(chat.members||{}).find(m=>m!==ME);const u=o?ALL_USERS[o]:null;
   if(!u)return`<div class="av" style="background:#999;position:relative">${ini('?')}${dot}</div>`;
@@ -1424,6 +1481,14 @@ async function markChatRead(chatId){
 function updateChatHeader(){
   const chat=ALL_CHATS[curChatId];if(!chat)return;
   const avEl=document.getElementById('ch-av'),nm=document.getElementById('ch-name'),st=document.getElementById('ch-status'),gb=document.getElementById('gbar');
+  if(chat.type==='bot'){
+    nm.textContent='🤖 GameBot';
+    st.textContent='Крестики-Нолики · зарабатывай монеты';
+    avEl.innerHTML='🤖';avEl.className='hav';
+    avEl.style.cssText='font-size:22px;background:linear-gradient(135deg,#4a0080,#7C4DFF);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer';
+    if(gb)gb.style.display='none';
+    updatePinBar();return;
+  }
   if(chat.type==='group'){
     if(chat.avatar){avEl.innerHTML=`<img src="${chat.avatar}" alt="">`;avEl.style.background='transparent';}
     else{avEl.innerHTML=ini(chat.name||'G');avEl.style.background=chat.color||'#2196F3';}
@@ -1433,6 +1498,7 @@ function updateChatHeader(){
     gb.style.display='none';const o=Object.keys(chat.members||{}).find(m=>m!==ME);const u=o?ALL_USERS[o]:null;
     if(u){if(u.avatar){avEl.innerHTML=`<img src="${u.avatar}" alt="">`;avEl.style.background='transparent';}else{avEl.innerHTML=ini(u.name);avEl.style.background=u.color||'#2196F3';}if(u.username==='dm1try')avEl.style.boxShadow='0 0 0 3px #ffd700,0 0 12px #ffd700';else avEl.style.boxShadow='';nm.textContent=u.name;st.textContent=chatStatus(chat);st.style.color=(u.online&&u.lastSeen&&Date.now()-u.lastSeen<35000)?'#a5f3c7':'rgba(255,255,255,.72)';}
   }
+  updatePinBar();
 }
 
 // ── RENDER MESSAGES ────────────────────────────────────────────────
@@ -1459,6 +1525,29 @@ function renderMessages(){
     const tickEl=el.querySelector('.chk');
     const isOut=msg.from===ME;
     if(isOut&&tickEl){const isRead=msg.readBy&&Object.keys(msg.readBy).some(k=>k!==ME);tickEl.innerHTML=isRead?TICK2:TICK1;}
+    // Update poll votes in real-time
+    if(msg.poll&&!msg.deleted){
+      const pollWrap=el.querySelector('.poll-wrap');
+      if(pollWrap){
+        const chat2=ALL_CHATS[curChatId];
+        const msgsMap2={};Object.values(MESSAGES).forEach(m2=>{msgsMap2[m2.id]=m2;});
+        const newPollHtml=buildMsgHtml(msg,msg.from===ME,chat2?.type==='group',ALL_USERS[msg.from],false,msgsMap2);
+        const tmp2=document.createElement('div');tmp2.innerHTML=newPollHtml;
+        const newPoll=tmp2.querySelector('.poll-wrap');
+        if(newPoll)pollWrap.replaceWith(newPoll);
+      }
+    }
+    // Update ttt board
+    if(msg.ttt&&!msg.deleted){
+      const tttWrap=el.querySelector('.ttt-wrap');
+      if(tttWrap){
+        const msgsMap3={};Object.values(MESSAGES).forEach(m3=>{msgsMap3[m3.id]=m3;});
+        const newTttHtml=buildMsgHtml(msg,false,false,null,false,msgsMap3);
+        const tmp3=document.createElement('div');tmp3.innerHTML=newTttHtml;
+        const newTtt=tmp3.querySelector('.ttt-wrap');
+        if(newTtt)tttWrap.replaceWith(newTtt);
+      }
+    }
     // Update deleted state
     if(isDel){
       const mt=el.querySelector('.mtext');if(mt)mt.innerHTML='🚫 Сообщение удалено';
@@ -1523,6 +1612,37 @@ function buildMsgHtml(msg,isOut,isGrp,sender,isDel,msgsMap){
   let rqHtml='';
   if(msg.replyTo&&!isDel&&msgsMap){const orig=msgsMap[msg.replyTo];if(orig){const rs=ALL_USERS[orig.from];rqHtml=`<div class="rq" onclick="scrollToMsg('${orig.id}');event.stopPropagation()"><div class="rqname">${esc(rs?.name||orig.from)}</div><div class="rqtext">${esc((orig.text||'📷 Медиа').slice(0,70))}</div></div>`;}}
   let mediaHtml='';
+  // Poll rendering
+  if(msg.poll&&!isDel){
+    const p=msg.poll;
+    const total=Object.values(p.votes||{}).length;
+    const votedOpt=p.votes?.[ME]??null;
+    const opts=p.options.map((opt,i)=>{
+      const cnt=Object.values(p.votes||{}).filter(v=>v===i).length;
+      const pct=total?Math.round(cnt/total*100):0;
+      const checked=votedOpt===i;
+      return`<div class="poll-opt" onclick="votePoll('${msg.id}',${i});event.stopPropagation()">
+        <div class="poll-opt-bg" style="width:${votedOpt!==null?pct:0}%"></div>
+        <div class="poll-opt-inner">
+          <div class="poll-opt-check${checked?' on':''}"></div>
+          <span class="poll-opt-text">${esc(opt)}</span>
+          ${votedOpt!==null?`<span class="poll-opt-pct">${pct}%</span>`:''}
+        </div>
+      </div>`;
+    }).join('');
+    mediaHtml=`<div class="poll-wrap"><div class="poll-q">📊 ${esc(p.question)}</div>${opts}<div class="poll-meta">${total} ${total===1?'голос':total<5?'голоса':'голосов'}</div></div>`;
+  }
+  // Tic-tac-toe rendering
+  if(msg.ttt&&!isDel){
+    const g=msg.ttt;
+    const cells=g.board.map((v,i)=>{
+      const cls=g.winLine&&g.winLine.includes(i)?' win':'';
+      return`<div class="ttt-cell${v?' '+(v==='X'?'x':'o'):''}${cls}" onclick="tttMove('${msg.id}',${i});event.stopPropagation()">${v||''}</div>`;
+    }).join('');
+    const st=g.winner?`${g.winner==='X'?'❌':'⭕'} ${g.winner==='X'?'Ты выиграл! +10 🪙':'Бот победил'}`:g.draw?'🤝 Ничья':g.turn==='X'?'Твой ход ❌':'🤖 Думает…';
+    const btn=g.winner||g.draw?`<button class="ttt-btn" onclick="tttNewGame('${msg.id}');event.stopPropagation()">🔄 Новая игра</button>`:'';
+    mediaHtml=`<div class="ttt-wrap"><div class="ttt-title">Крестики-Нолики</div><div class="ttt-board">${cells}</div><div class="ttt-status">${st}</div>${btn}</div>`;
+  }
   if(msg.image&&!isDel){mediaHtml=`<div class="mimg-wrap" onclick="viewImg('${msg.image.slice(0,30)}');event.stopPropagation()"><img class="mimg" src="${msg.image}" alt=""></div>`;}
   // Video
   if((msg.video||msg.videoRef)&&!isDel){
@@ -1634,6 +1754,7 @@ function showCtxPanel(msgId,isOut){
   const isDev=ME==='dm1try';
   const items=[
     {label:'Ответить',icon:'<polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>',fn:`startReply('${msgId}')`},
+    {label:'Закрепить',icon:'<line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17H19V13L17 7H7L5 13Z"/><line x1="5" y1="7" x2="19" y2="7"/>',fn:`pinMessage('${msgId}')`},
     {label:'Переслать',icon:'<polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/>',fn:`openForwardPicker('${msgId}')`},
     {label:'Копировать',icon:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',fn:`copyMsg('${msgId}')`},
   ];
@@ -1654,6 +1775,7 @@ window.openChatMenu=function(){
   const chat=ALL_CHATS[curChatId];if(!chat)return;dismissCtx();
   const panel=document.createElement('div');panel.className='ctx-panel';
   let items=[{label:'Информация',icon:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',fn:'openChatInfo()'}];
+  items.push({label:'Поиск в чате',icon:'<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',fn:'openMsgSearch()'});
   if(chat.type==='dm')items.push({label:'Удалить чат',icon:'<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',fn:'confirmDeleteDM()',red:true});
   if(chat.type==='group'&&chat.creator===ME)items.push({label:'Настройки группы',icon:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',fn:'openGroupSettings()'});
   if(chat.type==='group')items.push({label:'Покинуть группу',icon:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',fn:'leaveGroup()',red:true});
@@ -1755,6 +1877,10 @@ window.showAttachMenu=function(){
     <div class="attach-item" onclick="document.getElementById('music-pick').click();dismissCtx()">
       <div class="attach-ico" style="background:#FF9800"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
       <span class="attach-lbl">Музыка</span>
+    </div>
+    <div class="attach-item" onclick="dismissCtx();openPollCreator()">
+      <div class="attach-ico" style="background:#9C27B0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+      <span class="attach-lbl">Опрос</span>
     </div>
   </div>`;
   document.body.appendChild(panel);document.getElementById('ctx-ov').classList.add('on');ctxActive=panel;
@@ -2274,22 +2400,52 @@ window.handleMsgKey=function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefaul
 // ══════════════════════════════════════════════════════════════════
 // ── GIFT DEFINITIONS ────────────────────────────────────────────────
 const GIFT_CATALOG=[
-  {id:'star',    name:'Звезда',    price:10,  emoji:'⭐', color:'#FFD700', bg:'linear-gradient(145deg,#3d2c00,#1a1400)'},
-  {id:'fire',    name:'Огонь',     price:12,  emoji:'🔥', color:'#FF5722', bg:'linear-gradient(145deg,#3d1200,#1a0800)'},
-  {id:'heart',   name:'Сердце',    price:15,  emoji:'❤️', color:'#E91E63', bg:'linear-gradient(145deg,#3d0020,#1a000e)'},
-  {id:'coin',    name:'Монета',    price:20,  emoji:'🪙', color:'#FFC107', bg:'linear-gradient(145deg,#3d2c00,#1a1200)'},
-  {id:'car',     name:'Спорткар', price:30,  emoji:'🏎️', color:'#F44336', bg:'linear-gradient(145deg,#3d0a00,#1a0500)'},
-  {id:'diamond', name:'Бриллиант',price:40,  emoji:'💎', color:'#29B6F6', bg:'linear-gradient(145deg,#001a3d,#000d1a)'},
-  {id:'crown',   name:'Корона',    price:50,  emoji:'👑', color:'#FFD600', bg:'linear-gradient(145deg,#3d2c00,#1a1400)'},
+  // ── Tier 1 (10-15 монет) ──
+  {id:'star',    name:'Звезда',     price:10,  emoji:'⭐', color:'#FFD700', bg:'linear-gradient(145deg,#3d2c00,#1a1400)'},
+  {id:'fire',    name:'Огонь',      price:10,  emoji:'🔥', color:'#FF5722', bg:'linear-gradient(145deg,#3d1200,#1a0800)'},
+  {id:'heart',   name:'Сердце',     price:12,  emoji:'❤️', color:'#E91E63', bg:'linear-gradient(145deg,#3d0020,#1a000e)'},
+  {id:'flower',  name:'Цветок',     price:12,  emoji:'🌸', color:'#FF80AB', bg:'linear-gradient(145deg,#3d0028,#1a0012)'},
+  {id:'candy',   name:'Конфетка',   price:12,  emoji:'🍭', color:'#FF4081', bg:'linear-gradient(145deg,#3d001a,#1a000d)'},
+  {id:'balloon', name:'Шарик',      price:15,  emoji:'🎈', color:'#FF6B6B', bg:'linear-gradient(145deg,#3d0c0c,#1a0606)'},
+  {id:'cake',    name:'Тортик',     price:15,  emoji:'🎂', color:'#FF9800', bg:'linear-gradient(145deg,#3d1e00,#1a0e00)'},
+  // ── Tier 2 (20-30 монет) ──
+  {id:'coin',    name:'Монета',     price:20,  emoji:'🪙', color:'#FFC107', bg:'linear-gradient(145deg,#3d2c00,#1a1200)'},
+  {id:'clover',  name:'Клевер',     price:20,  emoji:'🍀', color:'#4CAF50', bg:'linear-gradient(145deg,#003d14,#001a09)'},
+  {id:'alien',   name:'Пришелец',   price:22,  emoji:'👽', color:'#69F0AE', bg:'linear-gradient(145deg,#003d20,#001a0e)'},
+  {id:'lightning',name:'Молния',    price:25,  emoji:'⚡', color:'#FFEB3B', bg:'linear-gradient(145deg,#3d3500,#1a1700)'},
+  {id:'car',     name:'Спорткар',   price:30,  emoji:'🏎️', color:'#F44336', bg:'linear-gradient(145deg,#3d0a00,#1a0500)'},
+  {id:'rocket',  name:'Ракета',     price:30,  emoji:'🚀', color:'#7C4DFF', bg:'linear-gradient(145deg,#1a003d,#0d001a)'},
+  // ── Tier 3 (40-60 монет) ──
+  {id:'diamond', name:'Бриллиант',  price:40,  emoji:'💎', color:'#29B6F6', bg:'linear-gradient(145deg,#001a3d,#000d1a)'},
+  {id:'trophy',  name:'Кубок',      price:40,  emoji:'🏆', color:'#FFD600', bg:'linear-gradient(145deg,#3d2800,#1a1100)'},
+  {id:'unicorn', name:'Единорог',   price:45,  emoji:'🦄', color:'#CE93D8', bg:'linear-gradient(145deg,#2a003d,#12001a)'},
+  {id:'crown',   name:'Корона',     price:50,  emoji:'👑', color:'#FFD600', bg:'linear-gradient(145deg,#3d2c00,#1a1400)'},
+  {id:'dragon',  name:'Дракон',     price:55,  emoji:'🐉', color:'#FF6D00', bg:'linear-gradient(145deg,#3d1500,#1a0900)'},
+  // ── Tier 4 (80-100 монет) ──
+  {id:'crystal', name:'Кристалл',   price:80,  emoji:'🔮', color:'#B39DDB', bg:'linear-gradient(145deg,#1a0038,#0d001a)'},
+  {id:'galaxy',  name:'Галактика',  price:100, emoji:'🌌', color:'#7C4DFF', bg:'linear-gradient(145deg,#05001a,#020010)'},
 ];
 const GIFT_ANIMS={
   star:'animation:giftSpinY 4s ease-in-out infinite',
   fire:'animation:giftFlicker 1.4s ease-in-out infinite',
   heart:'animation:giftHeartbeat 1.1s ease-in-out infinite',
+  flower:'animation:giftHeartbeat 1.3s ease-in-out infinite',
+  candy:'animation:giftSpinY 3s linear infinite',
+  balloon:'animation:giftFloat 1.8s ease-in-out infinite',
+  cake:'animation:giftFloat 2.2s ease-in-out infinite',
   coin:'animation:giftCoinFlip 3s linear infinite',
+  clover:'animation:giftSpinY 4s ease-in-out infinite',
+  alien:'animation:giftFloat 1.6s ease-in-out infinite',
+  lightning:'animation:giftFlicker .8s ease-in-out infinite',
   car:'animation:giftDrive .8s ease-in-out infinite alternate',
+  rocket:'animation:giftDrive 1.2s ease-in-out infinite alternate',
   diamond:'animation:giftGlimmer 2.2s ease-in-out infinite',
+  trophy:'animation:giftFloat 2s ease-in-out infinite',
+  unicorn:'animation:giftHeartbeat 1.5s ease-in-out infinite',
   crown:'animation:giftFloat 2s ease-in-out infinite',
+  dragon:'animation:giftFlicker 1.2s ease-in-out infinite',
+  crystal:'animation:giftGlimmer 1.8s ease-in-out infinite',
+  galaxy:'animation:giftSpinY 6s linear infinite',
 };
 
 // Create a beautiful gift element (div with emoji) — works in ALL browsers
@@ -2532,6 +2688,271 @@ async function loadUserGifts(un){
 
 // ── BOOT ───────────────────────────────────────────────────────────
 loadSettings();
+// ══════════════════════════════════════════════════════════════════
+// PINNED MESSAGES
+// ══════════════════════════════════════════════════════════════════
+window.pinMessage=async function(msgId){
+  if(!curChatId)return;
+  const msg=MESSAGES[msgId];if(!msg)return;
+  dismissCtx();
+  await update(ref(db,'chats/'+curChatId),{
+    pinnedMsg:msgId,
+    pinnedText:(msg.text||'📷 Медиа').slice(0,80)
+  });
+  showToast('📌 Сообщение закреплено');
+};
+
+window.unpinMessage=async function(){
+  if(!curChatId)return;
+  await update(ref(db,'chats/'+curChatId),{pinnedMsg:null,pinnedText:null});
+  closePinBar();showToast('Откреплено');
+};
+
+window.closePinBar=function(){
+  document.getElementById('pin-bar').style.display='none';
+};
+
+window.scrollToPinned=function(){
+  const chat=ALL_CHATS[curChatId];if(!chat?.pinnedMsg)return;
+  scrollToMsg(chat.pinnedMsg);
+};
+
+function updatePinBar(){
+  const chat=ALL_CHATS[curChatId];
+  const bar=document.getElementById('pin-bar');
+  if(!bar)return;
+  if(chat?.pinnedMsg){
+    bar.style.display='flex';
+    document.getElementById('pin-bar-text').textContent=chat.pinnedText||'Закреплённое сообщение';
+  }else{
+    bar.style.display='none';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// MESSAGE SEARCH
+// ══════════════════════════════════════════════════════════════════
+let msgSearchResults=[],msgSearchIdx=0;
+
+window.openMsgSearch=function(){
+  document.getElementById('msgsearch-bar').style.display='flex';
+  setTimeout(()=>document.getElementById('msgsearch-inp').focus(),100);
+};
+
+window.closeMsgSearch=function(){
+  document.getElementById('msgsearch-bar').style.display='none';
+  document.getElementById('msgsearch-inp').value='';
+  document.getElementById('msgsearch-count').textContent='';
+  // Remove highlights
+  document.querySelectorAll('.msg-highlight').forEach(el=>el.classList.remove('msg-highlight'));
+  msgSearchResults=[];msgSearchIdx=0;
+};
+
+window.onMsgSearch=function(q){
+  document.querySelectorAll('.msg-highlight').forEach(el=>el.classList.remove('msg-highlight'));
+  if(!q.trim()){document.getElementById('msgsearch-count').textContent='';msgSearchResults=[];return;}
+  const lq=q.toLowerCase();
+  msgSearchResults=[];
+  document.querySelectorAll('.mw[data-id]').forEach(el=>{
+    const t=el.querySelector('.mtext');
+    if(t&&t.textContent.toLowerCase().includes(lq)){
+      msgSearchResults.push(el);
+      t.classList.add('msg-highlight');
+    }
+  });
+  msgSearchIdx=msgSearchResults.length-1;
+  document.getElementById('msgsearch-count').textContent=msgSearchResults.length?`${msgSearchResults.length} найд.`:'Не найдено';
+  if(msgSearchResults.length)msgSearchResults[msgSearchIdx].scrollIntoView({block:'center'});
+};
+
+window.prevMsgResult=function(){
+  if(!msgSearchResults.length)return;
+  msgSearchIdx=(msgSearchIdx-1+msgSearchResults.length)%msgSearchResults.length;
+  msgSearchResults[msgSearchIdx].scrollIntoView({block:'center'});
+};
+window.nextMsgResult=function(){
+  if(!msgSearchResults.length)return;
+  msgSearchIdx=(msgSearchIdx+1)%msgSearchResults.length;
+  msgSearchResults[msgSearchIdx].scrollIntoView({block:'center'});
+};
+
+// ══════════════════════════════════════════════════════════════════
+// POLLS
+// ══════════════════════════════════════════════════════════════════
+window.openPollCreator=function(){
+  const ov=document.createElement('div');ov.className='poll-bar-modal';
+  ov.innerHTML=`<div class="poll-modal">
+    <div class="poll-modal-title">📊 Создать опрос</div>
+    <input class="poll-opt-inp" id="poll-q-inp" placeholder="Вопрос…" style="margin-bottom:14px">
+    <div id="poll-opts-wrap">
+      <input class="poll-opt-inp" placeholder="Вариант 1">
+      <input class="poll-opt-inp" placeholder="Вариант 2">
+    </div>
+    <button style="width:100%;padding:9px;background:rgba(255,255,255,.07);color:var(--t2);border:1.5px dashed var(--border);border-radius:12px;font-size:13px;cursor:pointer;margin-bottom:14px"
+      onclick="addPollOpt(this)">+ Добавить вариант</button>
+    <div style="display:flex;gap:10px">
+      <button class="btn gh" style="flex:1" onclick="this.closest('.poll-bar-modal').remove()">Отмена</button>
+      <button class="btn pr" style="flex:1" onclick="submitPoll(this)">Опубликовать</button>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  setTimeout(()=>ov.querySelector('#poll-q-inp').focus(),200);
+};
+
+window.addPollOpt=function(btn){
+  const wrap=document.getElementById('poll-opts-wrap');
+  const n=wrap.children.length+1;
+  if(n>=8){showToast('Максимум 8 вариантов');return;}
+  const inp=document.createElement('input');inp.className='poll-opt-inp';
+  inp.placeholder='Вариант '+n;wrap.appendChild(inp);
+};
+
+window.submitPoll=async function(btn){
+  const q=document.getElementById('poll-q-inp').value.trim();
+  if(!q){showToast('Введите вопрос');return;}
+  const opts=[...document.getElementById('poll-opts-wrap').querySelectorAll('input')]
+    .map(i=>i.value.trim()).filter(Boolean);
+  if(opts.length<2){showToast('Нужно минимум 2 варианта');return;}
+  btn.closest('.poll-bar-modal').remove();
+  const nr=push(ref(db,'messages/'+curChatId));
+  await set(nr,{
+    id:nr.key,from:ME,ts:Date.now(),edited:false,deleted:false,
+    poll:{question:q,options:opts,votes:{}}
+  });
+  await update(ref(db,'chats/'+curChatId),{lastMsg:'📊 '+q,lastMsgFrom:ME,lastMsgTime:Date.now()});
+  scrollMsgs();
+};
+
+window.votePoll=async function(msgId,optIdx){
+  if(!curChatId)return;
+  const msg=MESSAGES[msgId];if(!msg?.poll)return;
+  if(msg.poll.votes?.[ME]!==undefined){showToast('Вы уже голосовали');return;}
+  await update(ref(db,`messages/${curChatId}/${msgId}/poll/votes`),{[ME]:optIdx});
+};
+
+// ══════════════════════════════════════════════════════════════════
+// BOT CHAT — Крестики-Нолики
+// ══════════════════════════════════════════════════════════════════
+const BOT_ID='@gamebot';
+const BOT_CHAT_PREFIX='bot_';
+
+async function ensureBotChat(){
+  const botChatId=BOT_CHAT_PREFIX+ME;
+  // Check if already exists locally
+  if(ALL_CHATS[botChatId])return;
+  // Check Firebase
+  const snap=await get(ref(db,'chats/'+botChatId));
+  if(snap.exists())return;
+  // Create bot chat
+  await set(ref(db,'chats/'+botChatId),{
+    id:botChatId,type:'bot',
+    name:'🤖 GameBot',
+    members:{[ME]:true},
+    lastMsg:'Привет! Сыграем в крестики-нолики?',
+    lastMsgFrom:BOT_ID,lastMsgTime:Date.now()-1000,
+    createdAt:Date.now()-1000,
+    color:'#7C4DFF',botAvatar:'🤖'
+  });
+  // Send welcome message
+  const wr=push(ref(db,'messages/'+botChatId));
+  await set(wr,{
+    id:wr.key,from:BOT_ID,
+    text:'👋 Привет! Я GameBot. Могу сыграть с тобой в крестики-нолики. За победу получишь 10 монет!\n\nНажми кнопку чтобы начать:',
+    ts:Date.now()-500,edited:false,deleted:false
+  });
+  // Send game start button message
+  const gr=push(ref(db,'messages/'+botChatId));
+  await set(gr,{
+    id:gr.key,from:BOT_ID,
+    ttt:{
+      board:Array(9).fill(''),
+      turn:'X',winner:null,draw:false,winLine:null
+    },
+    ts:Date.now(),edited:false,deleted:false
+  });
+}
+
+function tttCheckWinner(board){
+  const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  for(const [a,b,c] of lines){
+    if(board[a]&&board[a]===board[b]&&board[a]===board[c])
+      return{winner:board[a],line:[a,b,c]};
+  }
+  return null;
+}
+
+function tttBotMove(board){
+  // Smart bot: tries to win, then blocks, then center, then corner, then random
+  const empty=board.map((v,i)=>v?null:i).filter(i=>i!==null);
+  if(!empty.length)return null;
+  // Try to win
+  for(const i of empty){
+    const b=[...board];b[i]='O';
+    if(tttCheckWinner(b))return i;
+  }
+  // Block player
+  for(const i of empty){
+    const b=[...board];b[i]='X';
+    if(tttCheckWinner(b))return i;
+  }
+  // Center
+  if(empty.includes(4))return 4;
+  // Corners
+  const corners=empty.filter(i=>[0,2,6,8].includes(i));
+  if(corners.length)return corners[Math.floor(Math.random()*corners.length)];
+  // Random
+  return empty[Math.floor(Math.random()*empty.length)];
+}
+
+window.tttMove=async function(msgId,cellIdx){
+  if(!curChatId)return;
+  const msg=MESSAGES[msgId];if(!msg?.ttt)return;
+  const g=msg.ttt;
+  if(g.turn!=='X'||g.winner||g.draw)return;
+  if(g.board[cellIdx])return;
+  const board=[...g.board];board[cellIdx]='X';
+  let winner=tttCheckWinner(board);
+  let draw=!winner&&board.every(v=>v);
+  let newState={board,turn:'O',winner:winner?.winner||null,draw,winLine:winner?.line||null};
+  // Update immediately
+  await update(ref(db,`messages/${curChatId}/${msgId}`),{ttt:newState});
+  if(winner?.winner==='X'){
+    // Player wins!
+    MY_COINS+=10;saveCoins();updateCoinsDisplay();
+    await update(ref(db,'users/'+ME),{mycoins:MY_COINS});
+    showToast('🏆 Ты выиграл! +10 монет');
+    return;
+  }
+  if(draw){showToast('🤝 Ничья!');return;}
+  // Bot move after delay
+  setTimeout(async()=>{
+    const fresh=MESSAGES[msgId];if(!fresh?.ttt||fresh.ttt.winner||fresh.ttt.draw)return;
+    const nb=[...fresh.ttt.board];
+    const botCell=tttBotMove(nb);
+    if(botCell===null)return;
+    nb[botCell]='O';
+    const bw=tttCheckWinner(nb);
+    const bd=!bw&&nb.every(v=>v);
+    await update(ref(db,`messages/${curChatId}/${msgId}`),{ttt:{
+      board:nb,turn:'X',winner:bw?.winner||null,draw:bd,winLine:bw?.line||null
+    }});
+    if(bw?.winner==='O')showToast('🤖 Бот победил. Попробуй ещё!');
+    if(bd)showToast('🤝 Ничья!');
+  },600);
+};
+
+window.tttNewGame=async function(msgId){
+  if(!curChatId)return;
+  await update(ref(db,`messages/${curChatId}/${msgId}`),{ttt:{
+    board:Array(9).fill(''),turn:'X',winner:null,draw:false,winLine:null
+  }});
+};
+
+// ══════════════════════════════════════════════════════════════════
+// Hook: update pin bar when chat header updates
+// ══════════════════════════════════════════════════════════════════
+const _origUpdateChatHeader=typeof updateChatHeader!=='undefined'?updateChatHeader:null;
+
 // Loader particle animation
 function startLoaderParticles(){
   const c=document.getElementById('loader-particles');if(!c)return;
