@@ -1997,31 +1997,34 @@ function renderAllMessages(onDone){
 function scrollMsgs(){
   const b=document.getElementById('msgs-body');
   if(!b)return;
-  b.scrollTo({top:b.scrollHeight+9999,behavior:'smooth'});
+  b.scrollTop=b.scrollHeight+9999;
+  document.getElementById('scroll-down-btn')?.classList.remove('show');
 }
 
 function initScrollBtn(){
-  // Recalculate button position above cfooter
+  // Position button above cfooter
   const footer=document.querySelector('.cfooter');
   const btn=document.getElementById('scroll-down-btn');
   if(footer&&btn){
-    btn.style.bottom=(footer.getBoundingClientRect().height+12)+'px';
+    btn.style.bottom=(footer.offsetHeight+12)+'px';
   }
+  // Re-attach scroll listener to msgs-body (may be fresh element after chat switch)
+  const body=document.getElementById('msgs-body');
+  if(!body)return;
+  body.removeEventListener('scroll',_onMsgsScroll);
+  body.addEventListener('scroll',_onMsgsScroll,{passive:true});
 }
 // One global scroll listener — attached once on page load
 function _setupScrollListener(){
-  // Use capturing on the msgs-body by polling its ID on each scroll event
-  document.addEventListener('scroll', _onMsgsScroll, {capture:true, passive:true});
-}
-function _onMsgsScroll(e){
+  // Attach directly to msgs-body — the only scrollable element in chat
   const body=document.getElementById('msgs-body');
-  if(!body||e.target!==body)return;
+  if(!body)return;
+  body.addEventListener('scroll', _onMsgsScroll, {passive:true});
+}
+function _onMsgsScroll(){
+  const body=document.getElementById('msgs-body');
   const btn=document.getElementById('scroll-down-btn');
-  if(!btn)return;
-  const chatScreen=document.getElementById('s-chat');
-  if(!chatScreen||chatScreen.classList.contains('hidden')){
-    btn.classList.remove('show');return;
-  }
+  if(!body||!btn)return;
   const fromBottom=body.scrollHeight-body.scrollTop-body.clientHeight;
   if(fromBottom>200){
     btn.classList.add('show');
