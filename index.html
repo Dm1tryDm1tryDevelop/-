@@ -322,6 +322,14 @@ body{font-family:'Inter',sans-serif;color:var(--text);position:fixed;inset:0}
 
 /* ═══ EMOJI PANEL ════════════════════════════════ */
 /* Shows in a 3-column grid, scrollable, with scrollbar */
+.ep-stk-btn{font-size:32px;background:none;border:none;cursor:pointer;padding:6px;border-radius:12px;
+  transition:transform .15s;line-height:1;display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:1}
+.ep-stk-btn:active{transform:scale(.85)}
+.ep-stk-btn:hover{background:var(--bg2)}
+.msg-sticker{font-size:72px;line-height:1;display:block;padding:4px 0;
+  filter:drop-shadow(0 4px 12px rgba(0,0,0,.25));user-select:none;
+  animation:stickerPop .3s cubic-bezier(.34,1.56,.64,1)}
+@keyframes stickerPop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
 #emoji-panel{
   display:none;
   flex-shrink:0;
@@ -733,7 +741,7 @@ input:-webkit-autofill{-webkit-box-shadow:0 0 0 100px var(--bg) inset!important;
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
     </button>
   </div>
-  <div id="emoji-panel"><div class="ep-grid" id="ep-grid"></div></div>
+  <div id="emoji-panel"></div>
 </div>
 
 <!-- SETTINGS -->
@@ -958,7 +966,13 @@ const WALLPAPERS=[
 ];
 
 // All emojis used in both ctx-panel reaction strip AND emoji input panel
-const ALL_EMOJIS=['😁','🥹','😅','😏','🥲','🤣','😛','😄','😮','👍','🫣','🙃','🍓','🙈','❤️','🔥','👎','😢','😡','🤩','🥰','💯','🎉','✅','🙏','👋','😍','🥳','😴','💪','🚀','⭐','🎯','🤯','💀','🫶','🤝','👏','😀','😂','😎','🤔','🥺','😤','🤪','😑','🙄','😬','🤗','🤭','😇','🥶','🤑','😏','🤫','🤐','😶','😑','🫠'];
+// Stickers — large emoji sent as sticker messages
+const STICKERS=[
+  '❤️','🔥','⭐','💯','🎉','🚀','💀','🥶','😍','🤣',
+  '😭','😤','🥳','🤩','😴','💪','🤯','🫶','👑','💎',
+  '🌊','🌈','🍕','🎯','🏆','🦋','🐉','💫','✨','🌟',
+];
+const ALL_EMOJIS=['😁','🥹','😅','😏','🥲','🤣','😛','😄','😮','👍','🫣','🙃','🍓','🙈','❤️','🔥','👎','😢','😡','🤩','🥰','💯','🎉','✅','🙏','👋','😍','🥳','😴','💪','🚀','⭐','🎯','🤯','💀','🫶','🤝','👏','😀','😂','😎','🤔','🥺','😤','🤪','😑','🙄','😬','🤗','🤭','😇','🥶','🤑','🤫','🤐','😶','🫠'];
 
 // ── TICK SVGs ─────────────────────────────────────────────────────
 // Single grey tick = message sent (not yet read)
@@ -1213,24 +1227,39 @@ function subscribeMessages(chatId){
   let prevIds=new Set();
   msgsUnsub=onValue(ref(db,'messages/'+chatId),snap=>{
     const nm=snap.val()||{};const ni=new Set(Object.keys(nm));
+    const newIds=[];
     if(!isFirstLoad){
       ni.forEach(id=>{
-        if(!prevIds.has(id)&&nm[id]?.from!==ME&&chatId===curChatId){
-          playReceiveSound();
-          update(ref(db,`messages/${chatId}/${id}/readBy`),{[ME]:true}).catch(()=>{});
+        if(!prevIds.has(id)){
+          newIds.push(id);
+          if(nm[id]?.from!==ME&&chatId===curChatId){
+            playReceiveSound();
+            update(ref(db,`messages/${chatId}/${id}/readBy`),{[ME]:true}).catch(()=>{});
+          }
         }
       });
     }
-    isFirstLoad=false;prevIds=ni;
-    // This is active chat — always 0 unread
+    prevIds=ni;
     if(chatId===curChatId){
       UNREAD_CACHE[chatId]=0;
       MESSAGES=nm;
-      renderMessages();
+      if(isFirstLoad){
+        // First load: full render
+        renderAllMessages();
+        setTimeout(()=>{
+          const firstUnread=document.querySelector('.mw[data-unread="1"]');
+          if(firstUnread)firstUnread.scrollIntoView({block:'center'});
+          else scrollMsgs();
+        },100);
+      }else{
+        // Incremental update
+        renderMessages();
+      }
       renderChatList();
     }else{
       recalcUnread(chatId, nm);
     }
+    isFirstLoad=false;
   });
   onValue(ref(db,'chats/'+chatId+'/typing'),snap=>{
     if(chatId!==curChatId)return;
@@ -1291,7 +1320,7 @@ function renderChatList(filter=''){
     // Groups: NO online dot
     const avEl=buildListAv(chat,dot);
     const unread=getUnread(chat.id);
-    const badge=unread?`<div class="ubadge">${unread}</div>`:'';
+    const badge=unread?`<div class="ubadge" style="background:var(--accent)">${unread>99?'99+':unread}</div>`:'';
     const rightCol=`<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0"><span class="ctime">${time}</span>${badge}</div>`;
     return`<div class="ci" onclick="openChat('${chat.id}')">${avEl}<div class="cinfo"><div class="crow"><span class="cname">${nm}</span>${rightCol}</div><div class="cprev">${prev}</div></div></div>`;
   }).join('');
@@ -1358,125 +1387,147 @@ function updateChatHeader(){
 // ── RENDER MESSAGES ────────────────────────────────────────────────
 function renderMessages(){
   const body=document.getElementById('msgs-body');
-  const atBottom=body.scrollHeight-body.scrollTop-body.clientHeight<100;
-  const savedTop=body.scrollTop;
-  const oldHeight=body.scrollHeight;
   const chat=ALL_CHATS[curChatId];
   const msgs=Object.values(MESSAGES).sort((a,b)=>a.ts-b.ts);
   if(!msgs.length){body.innerHTML=`<div class="empty" style="background:transparent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><h3>Начните общение</h3><p>Напишите первое сообщение!</p></div>`;return;}
   const msgsMap={};msgs.forEach(m=>{msgsMap[m.id]=m;});
-  let html='',lastDate='';
-  msgs.forEach(msg=>{
-    const d=fmtDate(msg.ts);if(d!==lastDate){html+=`<div class="ddiv">${d}</div>`;lastDate=d;}
-    const isOut=msg.from===ME,isGrp=chat?.type==='group',sender=ALL_USERS[msg.from],t=fmtFull(msg.ts),isDel=msg.deleted;
-    // Avatar for incoming group
-    let avHtml='';
-    if(!isOut&&isGrp&&!isDel){
-      if(sender?.avatar)avHtml=`<div class="av xs" style="cursor:pointer;flex-shrink:0" onclick="openUserProfile('${msg.from}')"><img src="${sender.avatar}" alt=""></div>`;
-      else avHtml=`<div class="av xs" style="background:${sender?.color||'#2196F3'};cursor:pointer;flex-shrink:0" onclick="openUserProfile('${msg.from}')">${ini(sender?.name||msg.from)}</div>`;
-    }
-    // Forward banner
-    let fwdHtml='';
-    if(msg.forwardFrom&&!isDel){fwdHtml=`<div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg>Переслано от ${esc(msg.forwardName||msg.forwardFrom)}</div>`;}
-    // Reply quote
-    let rqHtml='';
-    if(msg.replyTo&&!isDel){const orig=msgsMap[msg.replyTo];if(orig){const rs=ALL_USERS[orig.from];rqHtml=`<div class="rq" onclick="scrollToMsg('${orig.id}');event.stopPropagation()"><div class="rqname">${esc(rs?.name||orig.from)}</div><div class="rqtext">${esc((orig.text||'📷 Медиа').slice(0,70))}</div></div>`;}}
-    // Media: image
-    let mediaHtml='';
-    if(msg.image&&!isDel){mediaHtml=`<div class="mimg-wrap"><img src="${msg.image}" alt="фото" loading="lazy" onclick="viewImg('${msg.image}');event.stopPropagation()"></div>`;}
-    // Media: video — stored as base64 data URL
-    if((msg.video||msg.videoRef)&&!isDel){
-      const vid_id='vid_'+msg.id;
-      mediaHtml=`<div class="mvid-wrap" onclick="event.stopPropagation()" id="mvw_${msg.id}">
-        <video id="${vid_id}" data-msgid="${msg.id}" preload="metadata" playsinline style="width:100%;max-height:300px;display:block;border-radius:13px" controls onplay="hideFsBtn('${msg.id}')" onpause="showFsBtn('${msg.id}')" onloadedmetadata="this.dataset.loaded=1"></video>
-        <button id="fsbtn_${msg.id}" onclick="openVidView('${msg.id}');event.stopPropagation()" style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.6);border:none;border-radius:8px;padding:5px 9px;color:#fff;font-size:11px;font-weight:600;cursor:pointer;backdrop-filter:blur(4px);z-index:2;display:flex;align-items:center;gap:4px">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>Полный экран
-        </button>
-        
-      </div>`;
-      // Load video src after render (handles both direct and IDB refs)
-      setTimeout(async()=>{
-        const v=document.getElementById(vid_id);if(!v)return;
-        const src=await resolveMediaSrc(msg,'video');
-        if(src)v.src=src;
-      },50);
-    }
-    // Music
-    if((msg.audio||msg.audioRef)&&!isDel){
-      const audEl_id='aud_'+msg.id;
-      const fname=msg.audioName||'Аудио';
-      const fsizeRaw=msg.audioSize||0;
-      const fsize=fsizeRaw>1048576?(Math.round(fsizeRaw/104857.6)/10)+'МБ':fsizeRaw>0?Math.round(fsizeRaw/1024)+'КБ':'';
-      mediaHtml=`<div class="mmusic" onclick="event.stopPropagation()" id="mmusic_${msg.id}">
-        <div class="mmusic-top">
-          <div class="mmusic-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
-          <div class="mmusic-meta">
-            <div class="mmusic-title">${esc(fname)}</div>
-            <div class="mmusic-size">${fsize}</div>
-          </div>
-        </div>
-        <div class="meq paused" id="meq_${msg.id}">
-          <div class="meq-bar"></div><div class="meq-bar"></div><div class="meq-bar"></div>
-          <div class="meq-bar"></div><div class="meq-bar"></div><div class="meq-bar"></div>
-          <div class="meq-bar"></div>
-        </div>
-        <div class="mmusic-controls">
-          <button class="mmusic-playbtn" id="playbtn_${msg.id}" onclick="toggleAudio('${msg.id}')">
-            <svg id="playico_${msg.id}" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          </button>
-          <div class="mmusic-progress" id="prog_${msg.id}" onclick="seekAudio(event,'${msg.id}')">
-            <div class="mmusic-filled" id="progfill_${msg.id}"></div>
-          </div>
-          <div class="mmusic-time" id="audtime_${msg.id}">0:00</div>
-        </div>
-        <audio id="${audEl_id}" preload="none" style="display:none"></audio>
-      </div>`;
-      setTimeout(async()=>{
-        const a=document.getElementById(audEl_id);if(!a)return;
-        if(!a.src||a.src==='about:blank'||a.src===location.href){
-          const s=await resolveMediaSrc(msg,'audio');if(s){a.src=s;}
-        }
-      },80);
-    }
-    // Async load media from IDB if needed (after render)
-    if((msg.video||msg.videoRef)&&!isDel){
-      setTimeout(async()=>{const v=document.getElementById('vid_'+msg.id);if(v&&!v.src){const s=await resolveMediaSrc(msg,'video');if(s)v.src=s;}},60);
-    }
-    if((msg.audio||msg.audioRef)&&!isDel){
-      setTimeout(async()=>{const a=document.getElementById('aud_'+msg.id);if(a&&!a.src){const s=await resolveMediaSrc(msg,'audio');if(s)a.src=s;}},60);
-    }
-    // Reactions
-    let rxnHtml='';
-    if(msg.reactions&&!isDel){const rm={};Object.entries(msg.reactions).forEach(([uid,em])=>{if(!rm[em])rm[em]={c:0,mine:false};rm[em].c++;if(uid===ME)rm[em].mine=true;});rxnHtml='<div class="reactions">'+Object.entries(rm).map(([em,{c,mine}])=>`<div class="rxn${mine?' mine':''}" onclick="toggleRxn('${msg.id}','${em}');event.stopPropagation()">${em}<span>${c}</span></div>`).join('')+'</div>';}
-    // ── TICKS ─────────────────────────────────────────────────────
-    // RULE: isOut && !deleted → show tick
-    //   readBy has at least one key that's not ME → double blue (TICK2)
-    //   otherwise → single grey (TICK1)
-    let tickHtml='';
-    if(isOut&&!isDel){
-      const isRead=msg.readBy&&Object.keys(msg.readBy).some(k=>k!==ME);
-      tickHtml=`<span class="chk">${isRead?TICK2:TICK1}</span>`;
-    }
-    const editHtml=msg.edited&&!isDel?`<span class="edited-lbl">ред.</span>`:'';
-    const txtStyle=isDel?'color:var(--t3);font-style:italic':'';
-    const bubbleTxt=isDel?'🚫 Сообщение удалено':(msg.text?esc(msg.text):'');
-    if(isGrp&&!isOut){
-      html+=`<div class="mw in grp" data-id="${msg.id}" onclick="handleMsgTap(event,'${msg.id}',${isOut})">${avHtml}<div class="mbody">${!isDel?`<div class="msender" style="color:${sender?.color||'var(--blue)'}">${esc(sender?.name||msg.from)}</div>`:''}<div class="mb">${fwdHtml}${rqHtml}${mediaHtml}${bubbleTxt?`<span class="mtext" style="${txtStyle}">${bubbleTxt}</span>`:''}</div>${rxnHtml}<div class="mmeta">${editHtml}<span class="mtime">${t}</span>${tickHtml}</div></div></div>`;
-    }else{
-      const isUnread=!isOut&&(!msg.readBy||!msg.readBy[ME]);
-    html+=`<div class="mw ${isOut?'out':'in'}" data-id="${msg.id}" data-unread="${isUnread?'1':'0'}" onclick="handleMsgTap(event,'${msg.id}',${isOut})"><div class="mb">${fwdHtml}${rqHtml}${mediaHtml}${bubbleTxt?`<span class="mtext" style="${txtStyle}">${bubbleTxt}</span>`:''}</div>${rxnHtml}<div class="mmeta">${editHtml}<span class="mtime">${t}</span>${tickHtml}</div></div>`;
-    }
+  const existingIds=new Set([...body.querySelectorAll('.mw[data-id]')].map(el=>el.dataset.id));
+  const atBottom=body.scrollHeight-body.scrollTop-body.clientHeight<120;
+  // Update existing messages (reactions, ticks, deletions) WITHOUT touching media
+  body.querySelectorAll('.mw[data-id]').forEach(el=>{
+    const msgId=el.dataset.id;
+    const msg=MESSAGES[msgId];
+    if(!msg)return;
+    // Update reactions
+    const rxnContainer=el.querySelector('.reactions');
+    const isDel=msg.deleted;
+    const newRxnHtml=buildRxnHtml(msg,isDel);
+    if(rxnContainer){if(newRxnHtml!==rxnContainer.outerHTML){const tmp=document.createElement('div');tmp.innerHTML=newRxnHtml;if(tmp.firstChild)rxnContainer.replaceWith(tmp.firstChild);else rxnContainer.remove();}}
+    else if(newRxnHtml){const mm=el.querySelector('.mmeta');if(mm){const tmp=document.createElement('div');tmp.innerHTML=newRxnHtml;mm.before(tmp.firstChild);}}
+    // Update ticks
+    const tickEl=el.querySelector('.chk');
+    const isOut=msg.from===ME;
+    if(isOut&&tickEl){const isRead=msg.readBy&&Object.keys(msg.readBy).some(k=>k!==ME);tickEl.innerHTML=isRead?TICK2:TICK1;}
+    // Update deleted state
+    if(isDel){const mt=el.querySelector('.mtext');if(mt)mt.innerHTML='🚫 Сообщение удалено';}
   });
-  body.innerHTML=html;
-  // Restore scroll position without jumping
-  if(atBottom){
-    body.scrollTop=body.scrollHeight;
-  }else{
-    // Keep same visual position
-    const delta=body.scrollHeight-oldHeight;
-    body.scrollTop=savedTop+delta;
+  // Add new messages
+  let needsNew=false;
+  let lastDateDiv=null;
+  let lastDate='';
+  body.querySelectorAll('.ddiv').forEach(d=>{lastDateDiv=d;lastDate=d.textContent;});
+  const newMsgs=msgs.filter(m=>!existingIds.has(m.id));
+  if(newMsgs.length>0){
+    needsNew=true;
+    newMsgs.forEach(msg=>{
+      const d=fmtDate(msg.ts);
+      if(d!==lastDate){
+        const ddiv=document.createElement('div');ddiv.className='ddiv';ddiv.textContent=d;
+        body.appendChild(ddiv);lastDate=d;lastDateDiv=ddiv;
+      }
+      const isOut=msg.from===ME,isGrp=chat?.type==='group',sender=ALL_USERS[msg.from],isDel=msg.deleted;
+      const el=document.createElement('div');
+      el.innerHTML=buildMsgHtml(msg,isOut,isGrp,sender,isDel,msgsMap);
+      const mw=el.firstChild;
+      if(mw){body.appendChild(mw);loadMsgMedia(msg);}
+    });
+  }
+  if(needsNew&&atBottom){
+    requestAnimationFrame(()=>{body.scrollTop=body.scrollHeight+9999;});
   }
 }
+
+function buildRxnHtml(msg,isDel){
+  if(!msg.reactions||isDel)return'';
+  const rm={};Object.entries(msg.reactions).forEach(([uid,em])=>{if(!rm[em])rm[em]={c:0,mine:false};rm[em].c++;if(uid===ME)rm[em].mine=true;});
+  return'<div class="reactions">'+Object.entries(rm).map(([em,{c,mine}])=>`<div class="rxn${mine?' mine':''}" onclick="toggleRxn('${msg.id}','${em}');event.stopPropagation()">${em}<span>${c}</span></div>`).join('')+'</div>';
+}
+
+function buildMsgHtml(msg,isOut,isGrp,sender,isDel,msgsMap){
+  const t=fmtFull(msg.ts);
+  let avHtml='';
+  if(!isOut&&isGrp&&!isDel){
+    if(sender?.avatar)avHtml=`<div class="av xs" style="cursor:pointer;flex-shrink:0" onclick="openUserProfile('${msg.from}')"><img src="${sender.avatar}" alt=""></div>`;
+    else avHtml=`<div class="av xs" style="background:${sender?.color||'var(--blue)'};cursor:pointer;flex-shrink:0" onclick="openUserProfile('${msg.from}')">${ini(sender?.name||msg.from)}</div>`;
+  }
+  let fwdHtml='';
+  if(msg.forwardFrom&&!isDel)fwdHtml=`<div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg>Переслано от ${esc(msg.forwardName||msg.forwardFrom)}</div>`;
+  let rqHtml='';
+  if(msg.replyTo&&!isDel&&msgsMap){const orig=msgsMap[msg.replyTo];if(orig){const rs=ALL_USERS[orig.from];rqHtml=`<div class="rq" onclick="scrollToMsg('${orig.id}');event.stopPropagation()"><div class="rqname">${esc(rs?.name||orig.from)}</div><div class="rqtext">${esc((orig.text||'📷 Медиа').slice(0,70))}</div></div>`;}}
+  let mediaHtml='';
+  if(msg.image&&!isDel){mediaHtml=`<div class="mimg-wrap" onclick="viewImg('${msg.image.slice(0,30)}');event.stopPropagation()"><img class="mimg" src="${msg.image}" alt=""></div>`;}
+  // Video
+  if((msg.video||msg.videoRef)&&!isDel){
+    const vid_id='vid_'+msg.id;
+    const vstat=msg.videoStatus;
+    if(vstat==='sending')mediaHtml=`<div class="mvid-wrap"><div style="width:100%;height:140px;background:rgba(0,0,0,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff"><span id="vstatus_${msg.id}">Отправка<span class="dots-anim"></span></span></div></div>`;
+    else mediaHtml=`<div class="mvid-wrap"><video id="${vid_id}" controls playsinline preload="metadata" style="max-width:100%;border-radius:12px;display:block"></video></div>`;
+  }
+  // Audio/music
+  if((msg.audio||msg.audioRef)&&!isDel){
+    const audEl_id='aud_'+msg.id;
+    const fname=msg.audioName||'Аудио';
+    const fsizeRaw=msg.audioSize||0;
+    const fsize=fsizeRaw>1048576?(Math.round(fsizeRaw/104857.6)/10)+'МБ':fsizeRaw>0?Math.round(fsizeRaw/1024)+'КБ':'';
+    mediaHtml=`<div class="mmusic" onclick="event.stopPropagation()" id="mmusic_${msg.id}">
+      <div class="mmusic-top"><div class="mmusic-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
+        <div class="mmusic-meta"><div class="mmusic-title">${esc(fname)}</div><div class="mmusic-size">${fsize}</div></div></div>
+      <div class="meq paused" id="meq_${msg.id}"><div class="meq-bar"></div><div class="meq-bar"></div><div class="meq-bar"></div><div class="meq-bar"></div><div class="meq-bar"></div><div class="meq-bar"></div><div class="meq-bar"></div></div>
+      <div class="mmusic-controls">
+        <button class="mmusic-playbtn" id="playbtn_${msg.id}" onclick="toggleAudio('${msg.id}')"><svg id="playico_${msg.id}" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+        <div class="mmusic-progress" id="prog_${msg.id}" onclick="seekAudio(event,'${msg.id}')"><div class="mmusic-filled" id="progfill_${msg.id}"></div></div>
+        <div class="mmusic-time" id="audtime_${msg.id}">0:00</div>
+      </div>
+      <audio id="${audEl_id}" preload="none" style="display:none"></audio>
+    </div>`;
+  }
+  // Sticker (big emoji)
+  let stickerHtml='';
+  if(msg.sticker&&!isDel)stickerHtml=`<div class="msg-sticker">${msg.sticker}</div>`;
+  const rxnHtml=buildRxnHtml(msg,isDel);
+  // Ticks
+  let tickHtml='';
+  if(isOut&&!isDel){const isRead=msg.readBy&&Object.keys(msg.readBy).some(k=>k!==ME);tickHtml=`<span class="chk">${isRead?TICK2:TICK1}</span>`;}
+  const isUnread=!isOut&&(!msg.readBy||!msg.readBy[ME]);
+  const editHtml=msg.edited&&!isDel?`<span class="edited-lbl">ред.</span>`:'';
+  const txtStyle=isDel?'color:var(--t3);font-style:italic':'';
+  let bubbleTxt=isDel?'🚫 Сообщение удалено':(msg.text?esc(msg.text):'');
+  if(isGrp&&!isOut){
+    return`<div class="mw in grp" data-id="${msg.id}" onclick="handleMsgTap(event,'${msg.id}',${isOut})">${avHtml}<div class="mbody">${!isDel?`<div class="msender" style="color:${sender?.color||'var(--blue)'}">${esc(sender?.name||msg.from)}</div>`:''}<div class="mb">${fwdHtml}${rqHtml}${stickerHtml}${mediaHtml}${bubbleTxt?`<span class="mtext" style="${txtStyle}">${bubbleTxt}</span>`:''}</div>${rxnHtml}<div class="mmeta">${editHtml}<span class="mtime">${t}</span>${tickHtml}</div></div></div>`;
+  }else{
+    return`<div class="mw ${isOut?'out':'in'}" data-id="${msg.id}" data-unread="${isUnread?'1':'0'}" onclick="handleMsgTap(event,'${msg.id}',${isOut})"><div class="mb">${fwdHtml}${rqHtml}${stickerHtml}${mediaHtml}${bubbleTxt?`<span class="mtext" style="${txtStyle}">${bubbleTxt}</span>`:''}</div>${rxnHtml}<div class="mmeta">${editHtml}<span class="mtime">${t}</span>${tickHtml}</div></div>`;
+  }
+}
+
+function loadMsgMedia(msg){
+  if((msg.video||msg.videoRef)&&!msg.deleted){
+    setTimeout(async()=>{const v=document.getElementById('vid_'+msg.id);if(v&&!v.src){const s=await resolveMediaSrc(msg,'video');if(s)v.src=s;}},60);
+  }
+  if((msg.audio||msg.audioRef)&&!msg.deleted){
+    setTimeout(async()=>{const a=document.getElementById('aud_'+msg.id);if(a&&!a.src){const s=await resolveMediaSrc(msg,'audio');if(s&&!a.src)a.src=s;}},80);
+  }
+}
+
+function renderAllMessages(){
+  const body=document.getElementById('msgs-body');
+  const chat=ALL_CHATS[curChatId];
+  const msgs=Object.values(MESSAGES).sort((a,b)=>a.ts-b.ts);
+  body.innerHTML='';
+  if(!msgs.length){body.innerHTML=`<div class="empty" style="background:transparent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><h3>Начните общение</h3><p>Напишите первое сообщение!</p></div>`;return;}
+  const msgsMap={};msgs.forEach(m=>{msgsMap[m.id]=m;});
+  let lastDate='';
+  msgs.forEach(msg=>{
+    const d=fmtDate(msg.ts);
+    if(d!==lastDate){const dd=document.createElement('div');dd.className='ddiv';dd.textContent=d;body.appendChild(dd);lastDate=d;}
+    const isOut=msg.from===ME,isGrp=chat?.type==='group',sender=ALL_USERS[msg.from],isDel=msg.deleted;
+    const el=document.createElement('div');
+    el.innerHTML=buildMsgHtml(msg,isOut,isGrp,sender,isDel,msgsMap);
+    const mw=el.firstChild;
+    if(mw)body.appendChild(mw);
+    loadMsgMedia(msg);
+  });
+}
+
 function scrollMsgs(){const b=document.getElementById('msgs-body');requestAnimationFrame(()=>{b.scrollTop=b.scrollHeight+9999;});}
 window.scrollToMsg=function(id){const el=document.querySelector(`.mw[data-id="${id}"]`);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});const bubble=el.querySelector('.mb');if(bubble){bubble.style.transition='box-shadow .2s';bubble.style.boxShadow=`0 0 0 3px var(--blue), 0 0 20px rgba(42,171,238,.35)`;setTimeout(()=>{bubble.style.boxShadow='';bubble.style.transition='';},1600);}else{el.style.outline='2px solid var(--blue)';el.style.borderRadius='12px';setTimeout(()=>{el.style.outline='';},1500);}}};
 
@@ -1674,7 +1725,20 @@ window.sendVideoFile=async function(input){
   }
 };
 
-window.onTypingEvt=function(){if(!curChatId||!ME)return;update(ref(db,`chats/${curChatId}/typing/${ME}`),{t:true,ts:Date.now()});clearTimeout(typingTimer);typingTimer=setTimeout(()=>{if(curChatId&&ME)update(ref(db,`chats/${curChatId}/typing/${ME}`),{t:false,ts:0});},3000);};
+let lastTypingSend=0;
+window.onTypingEvt=function(){
+  if(!curChatId||!ME)return;
+  const now=Date.now();
+  // Throttle: send to Firebase max once per 2s
+  if(now-lastTypingSend>2000){
+    lastTypingSend=now;
+    update(ref(db,`chats/${curChatId}/typing/${ME}`),{t:true,ts:now});
+  }
+  clearTimeout(typingTimer);
+  typingTimer=setTimeout(()=>{
+    if(curChatId&&ME){update(ref(db,`chats/${curChatId}/typing/${ME}`),{t:false,ts:0});lastTypingSend=0;}
+  },3000);
+};
 
 // ── USER PROFILE ───────────────────────────────────────────────────
 window.openUserProfile=function(un){
@@ -1703,14 +1767,37 @@ window.openUserProfile=function(un){
   // Load and show gifts
   loadUserGifts(un).then(gifts=>{
     const showcase=document.getElementById('prof-gifts-showcase');if(!showcase)return;
+    showcase.innerHTML='';
     if(!gifts.length){showcase.innerHTML='<div style="font-size:12px;color:var(--t2);padding:8px 16px">Нет подарков</div>';return;}
     const gcMap={};GIFT_CATALOG.forEach(x=>gcMap[x.id]=x);
-    showcase.innerHTML=gifts.slice(0,8).map(g=>{
-      const cat=gcMap[g.id]||{svg:'',id:g.id};
+    gifts.slice(0,9).forEach(g=>{
+      const cat=gcMap[g.id];
       const anim=GIFT_ANIMS[g.id]||'animation:giftFloat 2s ease-in-out infinite';
-      const iconEl=cat.svg?`<div class="gift-bubble-icon" style="${anim}">${cat.svg}</div>`:'';
-      return`<div class="gift-bubble">${iconEl}<div style="font-size:12px;font-weight:700;color:var(--text)">${esc(g.name)}</div><div style="font-size:10px;color:var(--t2)">от <b>${esc(g.fromName||g.from)}</b></div></div>`;
-    }).join('');
+      const card=document.createElement('div');
+      card.className='gift-bubble';
+      // Icon container
+      const iconWrap=document.createElement('div');
+      iconWrap.className='gift-bubble-icon';
+      iconWrap.style.cssText=anim;
+      if(cat&&cat.svg){
+        // Parse SVG properly using DOMParser
+        const parser=new DOMParser();
+        const svgDoc=parser.parseFromString(cat.svg,'image/svg+xml');
+        const svgEl=svgDoc.documentElement;
+        svgEl.setAttribute('width','46');svgEl.setAttribute('height','46');
+        svgEl.style.width='46px';svgEl.style.height='46px';
+        iconWrap.appendChild(svgEl);
+      }
+      card.appendChild(iconWrap);
+      const nameEl=document.createElement('div');
+      nameEl.style.cssText='font-size:12px;font-weight:700;color:var(--text)';
+      nameEl.textContent=g.name;
+      const fromEl=document.createElement('div');
+      fromEl.style.cssText='font-size:10px;color:var(--t2)';
+      fromEl.innerHTML='от <b>'+(g.fromName||g.from)+'</b>';
+      card.appendChild(nameEl);card.appendChild(fromEl);
+      showcase.appendChild(card);
+    });
   });
   document.getElementById('prof-info-card').innerHTML=`<div class="srow nt"><div class="sico2" style="background:#5b8dee"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="sbody"><div class="slabel">Логин</div><div class="sval">@${u.username}</div></div></div>${u.bio?`<div class="srow nt"><div class="sico2" style="background:#8b5cf6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="sbody"><div class="slabel">О себе</div><div class="sval">${esc(u.bio)}</div></div></div>`:''}`;
   showScreen('s-profile');
@@ -1802,8 +1889,39 @@ window.openWallpaperPicker=function(){playClickSound();showScreen('s-wp');};
 // ── EMOJI PANEL ────────────────────────────────────────────────────
 // 7-column grid, scrollable, shows all ALL_EMOJIS
 function initEmojiPanel(){
-  document.getElementById('ep-grid').innerHTML=ALL_EMOJIS.map(em=>`<button class="ep-btn" onmousedown="event.preventDefault()" onclick="insertEmoji('${em}')">${em}</button>`).join('');
+  // Two tabs: stickers and emoji
+  const panel=document.getElementById('emoji-panel');
+  panel.innerHTML=`
+    <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:6px">
+      <button id="ep-tab-stk" onclick="epTab('stk')" style="flex:1;padding:7px;font-size:13px;font-weight:700;background:var(--accent);color:#fff;border:none;cursor:pointer;border-radius:8px 0 0 0">Стикеры</button>
+      <button id="ep-tab-emo" onclick="epTab('emo')" style="flex:1;padding:7px;font-size:13px;font-weight:700;background:var(--bg2);color:var(--t2);border:none;cursor:pointer;border-radius:0 8px 0 0">Эмодзи</button>
+    </div>
+    <div id="ep-stk-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:2px"></div>
+    <div id="ep-emo-grid" class="ep-grid" style="display:none"></div>`;
+  document.getElementById('ep-stk-grid').innerHTML=STICKERS.map(em=>`<button class="ep-stk-btn" onmousedown="event.preventDefault()" onclick="sendSticker('${em}')">${em}</button>`).join('');
+  document.getElementById('ep-emo-grid').innerHTML=ALL_EMOJIS.map(em=>`<button class="ep-btn" onmousedown="event.preventDefault()" onclick="insertEmoji('${em}')">${em}</button>`).join('');
 }
+window.epTab=function(tab){
+  const isStk=tab==='stk';
+  document.getElementById('ep-stk-grid').style.display=isStk?'grid':'none';
+  document.getElementById('ep-emo-grid').style.display=isStk?'none':'grid';
+  document.getElementById('ep-tab-stk').style.background=isStk?'var(--accent)':'var(--bg2)';
+  document.getElementById('ep-tab-stk').style.color=isStk?'#fff':'var(--t2)';
+  document.getElementById('ep-tab-emo').style.background=isStk?'var(--bg2)':'var(--accent)';
+  document.getElementById('ep-tab-emo').style.color=isStk?'var(--t2)':'#fff';
+};
+let lastStickerTs=0;
+window.sendSticker=async function(sticker){
+  if(!curChatId)return;
+  const now=Date.now();
+  if(now-lastStickerTs<1500){showToast('Подождите...');return;}
+  lastStickerTs=now;
+  document.getElementById('emoji-panel').style.display='none';
+  const nr=push(ref(db,'messages/'+curChatId));
+  await set(nr,{id:nr.key,from:ME,text:'',sticker,ts:now,edited:false,deleted:false});
+  await update(ref(db,'chats/'+curChatId),{lastMsg:sticker,lastMsgFrom:ME,lastMsgTime:now});
+  scrollMsgs();playSendSound();
+};
 window.toggleEmoji=function(){
   const p=document.getElementById('emoji-panel');
   const shown=p.style.display==='block';
@@ -2278,14 +2396,26 @@ window.openGifts=function(targetUser){
   document.getElementById('gifts-title').textContent='Подарить: '+(ALL_USERS[targetUser]?.name||targetUser);
   const grid=document.getElementById('gift-grid');
   const sorted=[...GIFT_CATALOG].sort((a,b)=>a.price-b.price);
-  grid.innerHTML=sorted.map(g=>{
+  grid.innerHTML='';
+  sorted.forEach(g=>{
     const anim=GIFT_ANIMS[g.id]||'animation:giftFloat 2s ease-in-out infinite';
-    return`<div class="gift-item" id="gitem_${g.id}" onclick="selectGift('${g.id}')">
-      <div class="gift-visual" style="${anim}">${g.svg}</div>
-      <div class="gift-name">${g.name}</div>
-      <div class="gift-price">${g.price} 🪙</div>
-    </div>`;
-  }).join('');
+    const item=document.createElement('div');
+    item.className='gift-item';item.id='gitem_'+g.id;
+    item.onclick=()=>selectGift(g.id);
+    const visWrap=document.createElement('div');
+    visWrap.className='gift-visual';visWrap.style.cssText=anim;
+    if(g.svg){
+      const parser=new DOMParser();
+      const svgDoc=parser.parseFromString(g.svg,'image/svg+xml');
+      const svgEl=svgDoc.documentElement;
+      svgEl.setAttribute('width','68');svgEl.setAttribute('height','68');
+      visWrap.appendChild(svgEl);
+    }
+    const nm=document.createElement('div');nm.className='gift-name';nm.textContent=g.name;
+    const pr=document.createElement('div');pr.className='gift-price';pr.textContent=g.price+' 🪙';
+    item.appendChild(visWrap);item.appendChild(nm);item.appendChild(pr);
+    grid.appendChild(item);
+  });
   document.getElementById('gift-selected-info').style.display='none';
   const btn=document.getElementById('gift-send-btn');
   btn.disabled=true;btn.style.opacity='.4';
@@ -2297,7 +2427,16 @@ window.selectGift=function(id){
   document.querySelectorAll('.gift-item').forEach(el=>el.classList.remove('sel'));
   const item=document.getElementById('gitem_'+id);if(item)item.classList.add('sel');
   const selAnim=GIFT_ANIMS[g.id]||'animation:giftFloat 2s ease-in-out infinite';
-  document.getElementById('gift-sel-ico').innerHTML=`<div style="width:42px;height:42px;${selAnim};filter:drop-shadow(0 3px 10px rgba(0,0,0,.3))">${g.svg}</div>`;
+  const selIco=document.getElementById('gift-sel-ico');
+  selIco.innerHTML='';
+  const swrap=document.createElement('div');
+  swrap.style.cssText='width:42px;height:42px;'+selAnim+';filter:drop-shadow(0 3px 10px rgba(0,0,0,.3))';
+  if(g.svg){
+    const p2=new DOMParser();const sd2=p2.parseFromString(g.svg,'image/svg+xml');
+    const se2=sd2.documentElement;se2.setAttribute('width','42');se2.setAttribute('height','42');
+    swrap.appendChild(se2);
+  }
+  selIco.appendChild(swrap);
   document.getElementById('gift-sel-name').textContent=g.name;
   document.getElementById('gift-sel-price').textContent=g.price+' Mycoins';
   document.getElementById('gift-selected-info').style.display='block';
@@ -2338,9 +2477,15 @@ function showGiftNotification(n, cat){
   if(existing)existing.remove();
   const banner=document.createElement('div');
   banner.id='gift-notif-banner';
-  const miniSvg=cat&&cat.svg?
-    `<div style="width:38px;height:38px;flex-shrink:0;filter:drop-shadow(0 2px 8px rgba(0,0,0,.28));animation:giftFloat 2s ease-in-out infinite">${cat.svg}</div>`
-    :`<span style="font-size:28px">🎁</span>`;
+  let miniSvgEl='';
+  if(cat&&cat.svg){
+    const pw=document.createElement('div');
+    pw.style.cssText='width:38px;height:38px;flex-shrink:0;animation:giftFloat 2s ease-in-out infinite;filter:drop-shadow(0 2px 8px rgba(0,0,0,.28))';
+    const prs=new DOMParser();const psd=prs.parseFromString(cat.svg,'image/svg+xml');
+    const pse=psd.documentElement;pse.setAttribute('width','38');pse.setAttribute('height','38');
+    pw.appendChild(pse);miniSvgEl=pw.outerHTML;
+  }else{miniSvgEl='<span style="font-size:28px">🎁</span>';}
+  const miniSvg=miniSvgEl;
   banner.innerHTML=`
     <div style="display:flex;align-items:center;gap:10px;flex:1">
       ${miniSvg}
