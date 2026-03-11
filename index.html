@@ -927,6 +927,10 @@ input:-webkit-autofill{-webkit-box-shadow:0 0 0 100px var(--bg) inset!important;
       <div class="srow nt"><div class="sico2" style="background:#2AABEE"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></div><div class="sbody"><div class="slabel">Имя</div><input class="sinp" id="s-name-inp" type="text"></div></div>
       <div class="srow nt"><div class="sico2" style="background:#8b5cf6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="sbody"><div class="slabel">О себе</div><input class="sinp" id="s-bio-inp" type="text" placeholder="Расскажите о себе…"></div></div>
     </div></div>
+    <div class="ssec"><div class="ssec-title">Mycoins и подарки</div><div class="scard">
+      <div class="srow" onclick="openTasks()"><div class="sico2" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="sbody"><div class="slabel" style="color:#d97706">Ежедневные задания</div><div class="sval">Зарабатывай Mycoins</div></div><div class="sarrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+      <div class="srow" onclick="showMyGifts()"><div class="sico2" style="background:linear-gradient(135deg,#c084fc,#f472b6)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div><div class="sbody"><div class="slabel" style="color:#a855f7">Мои подарки</div><div class="sval" id="my-gifts-count">Загрузка…</div></div><div class="sarrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+    </div></div>
     <div class="ssec"><div class="ssec-title">Внешний вид</div><div class="scard">
       <div class="srow" onclick="openWallpaperPicker()"><div class="sico2" style="background:#f97316"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><div class="sbody"><div class="slabel">Обои чатов</div><div class="sval">Изменить фон</div></div><div class="sarrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div></div>
       <div class="srow" onclick="toggleTheme()"><div class="sico2" style="background:#1a1a2e"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div><div class="sbody"><div class="slabel">Тёмная тема</div><div class="sval" id="theme-label">Выключена</div></div><button class="toggle" id="theme-toggle" onclick="event.stopPropagation();toggleTheme()"></button></div>
@@ -950,10 +954,6 @@ input:-webkit-autofill{-webkit-box-shadow:0 0 0 100px var(--bg) inset!important;
     <div class="ssec"><div class="ssec-title">Уведомления</div><div class="scard">
       <div class="srow" onclick="toggleNotifications()"><div class="sico2" style="background:#eab308"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div class="sbody"><div class="slabel">Уведомления</div><div class="sval" id="notif-label">Включены</div></div><button class="toggle on" id="notif-toggle" onclick="event.stopPropagation();toggleNotifications()"></button></div>
       <div class="srow" onclick="toggleSounds()"><div class="sico2" style="background:#06b6d4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div><div class="sbody"><div class="slabel">Звуки</div><div class="sval" id="sounds-label">Включены</div></div><button class="toggle on" id="sounds-toggle" onclick="event.stopPropagation();toggleSounds()"></button></div>
-    </div></div>
-    <div class="ssec"><div class="ssec-title">Mycoins и подарки</div><div class="scard">
-      <div class="srow" onclick="openTasks()"><div class="sico2" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="sbody"><div class="slabel" style="color:#d97706">Ежедневные задания</div><div class="sval">Зарабатывай Mycoins</div></div><div class="sarrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div></div>
-      <div class="srow" onclick="showMyGifts()"><div class="sico2" style="background:linear-gradient(135deg,#c084fc,#f472b6)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div><div class="sbody"><div class="slabel" style="color:#a855f7">Мои подарки</div><div class="sval" id="my-gifts-count">Загрузка…</div></div><div class="sarrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div></div>
     </div></div>
     <div class="ssec"><div class="ssec-title">Аккаунт</div><div class="scard">
       <div class="srow" onclick="doLogout()"><div class="sico2" style="background:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div><div class="sbody"><div class="slabel" style="color:var(--red)">Выход</div><div class="sval" style="color:var(--red)">Выйти из аккаунта</div></div></div>
@@ -2583,7 +2583,7 @@ window.showMyGifts=function(){
         body.appendChild(row);
       });
     }
-    openModal('m-my-gifts');
+    document.getElementById('m-my-gifts').style.display='flex';
   });
 };
 
@@ -3529,5 +3529,14 @@ async function boot(){
 boot();
 </script>
 
+<div id="m-my-gifts" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:none;align-items:flex-end;justify-content:center" onclick="if(event.target===this)document.getElementById('m-my-gifts').style.display='none'">
+  <div style="background:var(--bg);width:100%;max-width:480px;border-radius:20px 20px 0 0;max-height:80vh;display:flex;flex-direction:column;animation:slideUp .25s ease">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px;border-bottom:1px solid var(--border)">
+      <div style="font-size:17px;font-weight:800;color:var(--text)">🎁 Мои подарки</div>
+      <button onclick="document.getElementById('m-my-gifts').style.display='none'" style="background:var(--bg3);border:none;color:var(--text);width:30px;height:30px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div id="my-gifts-body" style="flex:1;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,0px)"></div>
+  </div>
+</div>
 </body>
 </html>
