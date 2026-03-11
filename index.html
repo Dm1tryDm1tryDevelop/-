@@ -953,6 +953,7 @@ input:-webkit-autofill{-webkit-box-shadow:0 0 0 100px var(--bg) inset!important;
     </div></div>
     <div class="ssec"><div class="ssec-title">Mycoins и подарки</div><div class="scard">
       <div class="srow" onclick="openTasks()"><div class="sico2" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="sbody"><div class="slabel" style="color:#d97706">Ежедневные задания</div><div class="sval">Зарабатывай Mycoins</div></div><div class="sarrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+      <div class="srow" onclick="showMyGifts()"><div class="sico2" style="background:linear-gradient(135deg,#c084fc,#f472b6)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div><div class="sbody"><div class="slabel" style="color:#a855f7">Мои подарки</div><div class="sval" id="my-gifts-count">Загрузка…</div></div><div class="sarrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div></div>
     </div></div>
     <div class="ssec"><div class="ssec-title">Аккаунт</div><div class="scard">
       <div class="srow" onclick="doLogout()"><div class="sico2" style="background:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div><div class="sbody"><div class="slabel" style="color:var(--red)">Выход</div><div class="sval" style="color:var(--red)">Выйти из аккаунта</div></div></div>
@@ -1432,6 +1433,11 @@ function enterApp(){
   subscribeGlobal();heartbeat();initEmojiPanel();buildWpGrid();applySettings();loadCoins();updateCoinsDisplay();
   ensureBotChat();
   initPush();
+  // Load gift count for settings screen
+  loadUserGifts(ME).then(gifts=>{
+    const el=document.getElementById('my-gifts-count');
+    if(el)el.textContent=gifts&&gifts.length?`${gifts.length} подарк${gifts.length===1?'':gifts.length<5?'а':'ов'}`:'Пусто';
+  });
   // Custom scrollbar logic
   (function(){
     let hideTimer=null;
