@@ -2000,8 +2000,11 @@ function buildMsgHtml(msg,isOut,isGrp,sender,isDel,msgsMap){
   if((msg.video||msg.videoRef)&&!isDel){
     const vid_id='vid_'+msg.id;
     const vstat=msg.videoStatus;
-    if(vstat==='sending')mediaHtml=`<div class="mvid-wrap"><div style="width:100%;height:140px;background:rgba(0,0,0,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff"><span id="vstatus_${msg.id}">Отправка<span class="dots-anim"></span></span></div></div>`;
-    else mediaHtml=`<div class="mvid-wrap"><video id="${vid_id}" controls playsinline preload="metadata" style="max-width:100%;border-radius:12px;display:block"></video></div>`;
+    if(vstat==='sending'){
+      mediaHtml=`<div class="mvid-wrap"><div style="width:100%;height:140px;background:rgba(0,0,0,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff"><span id="vstatus_${msg.id}">Отправка<span class="dots-anim"></span></span></div></div>`;
+    }else{
+      mediaHtml=`<div class="mvid-wrap"><video id="${vid_id}" controls playsinline preload="metadata" style="max-width:100%;border-radius:12px;display:block"></video></div>`;
+    }
   }
   // Audio/music
   if((msg.audio||msg.audioRef)&&!isDel){
@@ -2283,12 +2286,9 @@ async function getFromIDB(key){return new Promise((res,rej)=>{const req=indexedD
 
 window.sendVideoFile=async function(input){
   const file=input.files[0];if(!file||!curChatId)return;input.value='';
-  const MB=1024*1024;
-  if(file.size>100*MB){showToast('Видео слишком большое (макс. 100 МБ)');return;}
   const chat=ALL_CHATS[curChatId];
   const isGrp=chat?.type==='group';
   const senderName=ALL_USERS[ME]?.name||ME;
-  // Animated dots status
   let dotStep=0;const dotInterval=setInterval(()=>{
     const dots=['.','..','...'][dotStep%3];dotStep++;
     const msg=isGrp?`${senderName} отправляет видео${dots}`:`Отправляет видео${dots}`;
@@ -2296,25 +2296,20 @@ window.sendVideoFile=async function(input){
   },600);
   showToast('Видео отправляется…');
   try{
+    // Конвертируем в base64 — хранится в Firebase, доступно всем участникам
     const dataUrl=await readFileAsDataURL(file);
-    // Store in IDB if >5MB, reference by key in Firebase
-    let videoRef=null;let videoData=null;
-    const idbKey='vid_'+ME+'_'+Date.now();
-    if(file.size>5*MB){
-      await saveToIDB(idbKey,dataUrl);
-      videoRef=idbKey;// store IDB key in Firebase message
-    }else{
-      videoData=dataUrl;
-    }
     clearInterval(dotInterval);
     update(ref(db,`chats/${curChatId}/typing/${ME}`),{t:false,ts:0,custom:''});
     const nr=push(ref(db,'messages/'+curChatId));
-    const msgData={id:nr.key,from:ME,text:'',ts:Date.now(),replyTo:replyTo?replyTo.msgId:null,edited:false,deleted:false,videoSize:file.size,videoName:file.name};
-    if(videoData)msgData.video=videoData;
-    if(videoRef)msgData.videoRef=videoRef;
-    await set(nr,msgData);
+    await set(nr,{
+      id:nr.key,from:ME,text:'',ts:Date.now(),
+      replyTo:replyTo?replyTo.msgId:null,
+      edited:false,deleted:false,
+      videoSize:file.size,videoName:file.name||'video',
+      video:dataUrl
+    });
     await update(ref(db,'chats/'+curChatId),{lastMsg:'🎥 Видео',lastMsgFrom:ME,lastMsgTime:Date.now()});
-    cancelReply();scrollMsgs();playSendSound();showToast('Видео отправлено ✓');incrementTask('videos');
+    cancelReply();playSendSound();showToast('Видео отправлено ✓');incrementTask('videos');
   }catch(e){
     clearInterval(dotInterval);
     update(ref(db,`chats/${curChatId}/typing/${ME}`),{t:false,ts:0,custom:''});
