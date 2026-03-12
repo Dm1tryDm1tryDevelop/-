@@ -177,7 +177,7 @@ body{font-family:'Inter',sans-serif;color:var(--text);position:fixed;inset:0}
 /* ═══ CHAT SCREEN ════════════════════════════════ */
 /* Скрыть нативный скроллбар — используем свой */
 #msgs-body::-webkit-scrollbar{display:none}
-#msgs-body{scrollbar-width:none;-ms-overflow-style:none}
+#msgs-body{scrollbar-width:none;-ms-overflow-style:none;overflow-y:auto;overflow-x:hidden}
 
 /* ── Кастомный JS скроллбар ─────────────────── */
 .chat-scrollbar{
@@ -228,18 +228,18 @@ body{font-family:'Inter',sans-serif;color:var(--text);position:fixed;inset:0}
 .mw.out .mb{background:var(--out);border-bottom-right-radius:4px;border-top-right-radius:18px}
 .mw.in .mb{background:var(--in);border-bottom-left-radius:4px;border-bottom-left-radius:4px}
 .mtext{font-size:14.5px;line-height:1.55;color:var(--text);user-select:text;white-space:pre-wrap}
-.mw{position:relative;transition:transform .1s ease}
+.mw{position:relative;transition:transform .15s ease;overflow:visible}
 .swipe-icon{
-  position:absolute;top:50%;transform:translateY(-50%);
-  width:32px;height:32px;border-radius:50%;
+  position:absolute;top:50%;
+  width:30px;height:30px;border-radius:50%;
   background:var(--accent);
   display:flex;align-items:center;justify-content:center;
-  opacity:0;pointer-events:none;z-index:10;
-  box-shadow:0 2px 10px rgba(0,0,0,.3);
-  transition:opacity .1s,transform .1s}
-.mw.out .swipe-icon{right:-40px}
-.mw.in  .swipe-icon{left:-40px}
-.mw.swiping .swipe-icon{opacity:1;transform:translateY(-50%) scale(1.1)}
+  opacity:0;pointer-events:none;z-index:5;
+  box-shadow:0 2px 8px rgba(0,0,0,.25);
+  transition:opacity .15s}
+.mw.out .swipe-icon{right:calc(100% + 6px);transform:translateY(-50%)}
+.mw.in  .swipe-icon{left:calc(100% + 6px);transform:translateY(-50%)}
+.mw.swiping .swipe-icon{opacity:1}
 [data-theme="dark"] .mw.out .mtext{color:#d4eeff}
 .rq{border-left:3px solid var(--blue);padding:3px 8px;margin-bottom:6px;cursor:pointer;
   background:rgba(42,171,238,.09);border-radius:0 7px 7px 0}
@@ -2465,7 +2465,7 @@ window.openUserProfile=function(un){
   if(u.online&&u.lastSeen&&Date.now()-u.lastSeen<35000){st.textContent='● В сети';st.className='prof-status on';}else{st.textContent='Был(а) '+fmtLastSeen(u.lastSeen);st.className='prof-status off';}
   const bioSec=document.getElementById('prof-bio-sec');
   if(u.bio){document.getElementById('prof-bio').textContent=u.bio;bioSec.style.display='block';}else bioSec.style.display='none';
-  const profActionsHtml=un!==ME?`<button class="btn pr" style="flex:1" onclick="startDMWith('${un}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Написать</button><button class="btn gh" style="flex:1" onclick="openGifts('${un}')">🎁 Подарить</button><button class="btn pr" style="flex:1;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#000;border:none" onclick="transferCoins('${un}')">💸 Монеты</button>`:`<button class="btn gh" style="flex:1" onclick="openTasks()">🪙 Мои задания</button><button class="btn pr" style="flex:1" onclick="showMyGifts()">🎁 Мои подарки</button>`;
+  const profActionsHtml=un!==ME?`<button class="btn pr" style="flex:1" onclick="startDMWith('${un}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Написать</button><button class="btn gh" style="flex:1" onclick="openGifts('${un}')">🎁 Подарить</button></div><div style="display:flex;gap:8px;padding:0 12px 12px"><button class="btn pr" style="flex:1;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#000;border:none;font-weight:800" onclick="transferCoins('${un}')">💸 Перевести монеты</button>`:`<button class="btn gh" style="flex:1" onclick="openTasks()">🪙 Мои задания</button><button class="btn pr" style="flex:1" onclick="showMyGifts()">🎁 Мои подарки</button>`;
   document.getElementById('prof-actions').innerHTML=profActionsHtml;
   // Load and show gifts — use token to cancel stale async results
   const _giftToken=un; // unique per user
