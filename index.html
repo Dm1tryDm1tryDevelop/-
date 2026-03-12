@@ -2216,11 +2216,15 @@ window.togglePinChat=async function(chatId){
   const cid=chatId||curChatId;if(!cid)return;
   const chat=ALL_CHATS[cid];if(!chat)return;
   const isPinned=chat.pinnedBy&&chat.pinnedBy[ME];
+  const pinPath='pinnedBy/'+ME;
+  const upd={};
   if(isPinned){
-    await update(ref(db,'chats/'+cid),{'pinnedBy/'+ME:null});
+    upd[pinPath]=null;
+    await update(ref(db,'chats/'+cid),upd);
     showToast('Чат откреплён');
   }else{
-    await update(ref(db,'chats/'+cid),{'pinnedBy/'+ME:true});
+    upd[pinPath]=true;
+    await update(ref(db,'chats/'+cid),upd);
     showToast('Чат закреплён 📌');
   }
   renderChatList();
@@ -2485,10 +2489,7 @@ window.openUserProfile=function(un){
       // Big emoji icon in styled container
       const icon=document.createElement('div');
       icon.style.cssText=
-        `width:72px;height:72px;border-radius:20px;background:${cat.bg};`+
-        `display:flex;align-items:center;justify-content:center;font-size:40px;line-height:1;`+
-        `box-shadow:0 0 22px ${cat.color}66,0 4px 12px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.15);`+
-        `border:2px solid ${cat.color}66;cursor:pointer;transition:transform .15s;user-select:none;`;
+        `width:72px;height:72px;border-radius:20px;background:${cat.bg};display:flex;align-items:center;justify-content:center;font-size:40px;line-height:1;box-shadow:0 0 22px ${cat.color}66,0 4px 12px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.15);border:2px solid ${cat.color}66;cursor:pointer;transition:transform .15s;user-select:none;`;
       icon.textContent=cat.emoji;
       let animTimeout;
       icon.addEventListener('click',()=>{
@@ -2762,8 +2763,7 @@ window.showMyGifts=function(){
         iconWrap.appendChild(sp);
         const info=document.createElement('div');
         info.style.cssText='flex:1;min-width:0';
-        info.innerHTML=`<div style="font-size:14px;font-weight:700;color:var(--text)">${esc(cat.name)}</div>`+
-          `<div style="font-size:12px;color:var(--t3);margin-top:2px">От: ${esc(ALL_USERS[g.from]?.name||g.from)} · ${fmtTime(g.ts)}</div>`;
+        info.innerHTML=`<div style="font-size:14px;font-weight:700;color:var(--text)">${esc(cat.name)}</div><div style="font-size:12px;color:var(--t3);margin-top:2px">От: ${esc(ALL_USERS[g.from]?.name||g.from)} · ${fmtTime(g.ts)}</div>`;
         const price=document.createElement('div');
         price.style.cssText='font-size:13px;font-weight:800;color:var(--accent);flex-shrink:0';
         price.textContent=cat.price+'🪙';
@@ -3066,10 +3066,7 @@ function makeGiftEl(id, size){
   const wrap=document.createElement('div');
   const fontSize=Math.round(size*.55);
   const anim=GIFT_ANIMS[id]||'animation:giftFloat 2s ease-in-out infinite';
-  wrap.style.cssText=`width:${size}px;height:${size}px;border-radius:${Math.round(size*.22)}px;`+
-    `background:${g.bg};display:flex;align-items:center;justify-content:center;`+
-    `font-size:${fontSize}px;line-height:1;box-shadow:0 0 ${size*.18}px ${g.color}55,inset 0 1px 0 rgba(255,255,255,.12);`+
-    `border:1.5px solid ${g.color}44;flex-shrink:0;`;
+  wrap.style.cssText=`width:${size}px;height:${size}px;border-radius:${Math.round(size*.22)}px;background:${g.bg};display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;line-height:1;box-shadow:0 0 ${size*.18}px ${g.color}55,inset 0 1px 0 rgba(255,255,255,.12);border:1.5px solid ${g.color}44;flex-shrink:0;`;
   // Apply animation to the emoji span so it animates independently
   const span=document.createElement('span');
   span.style.cssText=`display:inline-block;${anim};`;
