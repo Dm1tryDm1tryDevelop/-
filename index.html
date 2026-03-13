@@ -40,6 +40,70 @@ body{font-family:'Inter',sans-serif;color:var(--text);position:fixed;inset:0}
   z-index:9999;gap:0;transition:opacity .5s;overflow:hidden}
 #loader.out{opacity:0;pointer-events:none}
 #loader-particles{position:absolute;inset:0;pointer-events:none}
+.ld-ring-outer{position:relative;width:120px;height:120px;margin-bottom:32px}
+.ld-ring-outer::before{content:'';position:absolute;inset:-4px;border-radius:50%;
+  background:conic-gradient(from 0deg,transparent 0%,transparent 30%,#2AABEE 60%,#a78bfa 80%,#2AABEE 100%);
+  animation:spin 2.2s linear infinite;filter:blur(1px)}
+.ld-ring-outer::after{content:'';position:absolute;inset:4px;border-radius:50%;background:#0a1120}
+.ld-logo{position:absolute;inset:10px;background:linear-gradient(145deg,#0f1c35,#0a1120);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(42,171,238,.2);z-index:1;
+  box-shadow:inset 0 0 20px rgba(42,171,238,.05)}
+.ld-logo svg{width:56px;height:56px;filter:drop-shadow(0 0 12px rgba(42,171,238,.7)) drop-shadow(0 0 30px rgba(167,139,250,.3))}
+.ld-app-name{color:#fff;font-size:24px;font-weight:900;letter-spacing:2px;
+  background:linear-gradient(90deg,#7dd3fc,#fff,#a78bfa);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;margin-bottom:4px}
+.ld-tagline{font-size:11px;color:rgba(255,255,255,.3);letter-spacing:3px;text-transform:uppercase;margin-bottom:28px}
+.ld-status{color:rgba(255,255,255,.45);font-size:12px;letter-spacing:.5px;margin-bottom:20px;
+  min-height:16px;transition:all .3s}
+.ld-progress-wrap{width:200px;height:2px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;margin-bottom:28px}
+.ld-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#2AABEE,#a78bfa);
+  border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 10px rgba(42,171,238,.6)}
+.ld-dots{display:flex;gap:8px}
+.ld-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.15);transition:all .3s}
+.ld-dot.on{background:#2AABEE;box-shadow:0 0 8px #2AABEE}u">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>MyMessend</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#2AABEE;--blue2:#1a96d4;--blue3:#e8f5fd;--blue4:#cde9f9;
+  --accent:#2AABEE;--accent2:#1a96d4;--accent3:#e8f5fd;--accent4:#cde9f9;
+  --font-color:#0d0d0d;
+  --bg:#ffffff;--bg2:#f2f3f5;--bg3:#e4e6ea;
+  --border:#e0e4ea;--border2:#c4ccd5;
+  --text:#0d0d0d;--t2:#5a6472;--t3:#8b98a5;--t4:#b8c2cc;
+  --out:#e7fdd3;--in:#ffffff;
+  --green:#22c55e;--red:#ef4444;--red2:#fef2f2;--orange:#f97316;
+  --chat-bg:#dfd5c9;
+  --hh:60px;--bs:env(safe-area-inset-bottom,0px);
+  --s1:0 1px 4px rgba(0,0,0,.07);
+  --s2:0 4px 20px rgba(0,0,0,.10);
+  --s3:0 8px 40px rgba(0,0,0,.18);
+  --radius:18px;
+}
+[data-theme="dark"]{
+  --bg:#0f1923;--bg2:#151f2e;--bg3:#1c2a3a;
+  --border:#1e2d3d;--border2:#2a3f55;
+  --text:#dde8f5;--t2:#7a99b5;--t3:#4a6880;--t4:#2e4a60;
+  --out:#1a3a5c;--in:#1c2a3a;--blue3:#0e2040;--blue4:#0a1830;
+  --chat-bg:#0a1420;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;height:100dvh;overflow:hidden;background:var(--bg)}
+body{font-family:'Inter',sans-serif;color:var(--text);position:fixed;inset:0}
+
+/* ═══ LOADER ═══════════════════════════════════ */
+#loader{position:fixed;inset:0;
+  background:linear-gradient(145deg,#0d1117 0%,#0f1923 40%,#0a1628 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:9999;gap:0;transition:opacity .5s;overflow:hidden}
+#loader.out{opacity:0;pointer-events:none}
+#loader-particles{position:absolute;inset:0;pointer-events:none}
 .ld-ring-outer{position:relative;width:130px;height:130px;margin-bottom:28px}
 .ld-ring-outer::before{content:'';position:absolute;inset:-3px;border-radius:50%;
   background:conic-gradient(from 0deg,transparent 0%,#2AABEE 30%,#5cc8f5 50%,transparent 70%);
@@ -805,7 +869,8 @@ input:-webkit-autofill{-webkit-box-shadow:0 0 0 100px var(--bg) inset!important;
       </svg>
     </div>
   </div>
-  <h2>MyMessend</h2>
+  <div class="ld-app-name">MyMessend</div>
+  <div class="ld-tagline">messenger</div>
   <div class="ld-status" id="ld-status">Подключение…</div>
   <div class="ld-progress-wrap"><div class="ld-progress-bar" id="ld-bar"></div></div>
   <div class="ld-dots">
@@ -2075,7 +2140,7 @@ function buildMsgHtml(msg,isOut,isGrp,sender,isDel,msgsMap){
       const cls=g.winLine&&g.winLine.includes(i)?' win':'';
       return`<div class="ttt-cell${v?' '+(v==='X'?'x':'o'):''}${cls}" onclick="tttMove('${msg.id}',${i});event.stopPropagation()">${v||''}</div>`;
     }).join('');
-    const st=g.winner?`${g.winner==='X'?'❌':'⭕'} ${g.winner==='X'?'Ты выиграл! +10 🪙':'Бот победил'}`:g.draw?'🤝 Ничья':g.turn==='X'?'Твой ход ❌':'🤖 Думает…';
+    const st=g.winner?`${g.winner==='X'?'❌':'⭕'} ${g.winner==='X'?'Ты выиграл! +10 M':'Бот победил'}`:g.draw?'🤝 Ничья':g.turn==='X'?'Твой ход ❌':'🤖 Думает…';
     const btn=g.winner||g.draw?`<button class="ttt-btn" onclick="tttNewGame('${msg.id}');event.stopPropagation()">🔄 Новая игра</button>`:'';
     mediaHtml=`<div class="ttt-wrap"><div class="ttt-title">Крестики-Нолики</div><div class="ttt-board">${cells}</div><div class="ttt-status">${st}</div>${btn}</div>`;
   }
@@ -2295,7 +2360,7 @@ window.sendMessage=async function(){
     // Show local notification only
     const notifEl=document.createElement('div');
     notifEl.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#b8860b,#ffd700);color:#000;font-weight:800;font-size:13px;padding:8px 18px;border-radius:14px;z-index:9999;box-shadow:0 4px 16px rgba(255,215,0,.5);white-space:nowrap';
-    notifEl.textContent='🪙 +'+amount+' Mycoins выдано!';
+    notifEl.textContent='+'+amount+' Mycoins выдано!';
     document.body.appendChild(notifEl);
     setTimeout(()=>{notifEl.style.opacity='0';notifEl.style.transition='opacity .4s';setTimeout(()=>notifEl.remove(),400);},2500);
     return;
@@ -2390,6 +2455,11 @@ async function getFromIDB(key){return new Promise((res,rej)=>{const req=indexedD
 
 window.sendVideoFile=async function(input){
   const file=input.files[0];if(!file||!curChatId)return;input.value='';
+  const MAX_VIDEO_MB=15;
+  if(file.size>MAX_VIDEO_MB*1024*1024){
+    showToast('⚠️ Видео слишком большое (макс. '+MAX_VIDEO_MB+' МБ). Выберите другое.');
+    return;
+  }
   const chat=ALL_CHATS[curChatId];
   const isGrp=chat?.type==='group';
   const senderName=ALL_USERS[ME]?.name||ME;
@@ -2463,7 +2533,7 @@ window.openUserProfile=function(un){
   if(u.online&&u.lastSeen&&Date.now()-u.lastSeen<35000){st.textContent='● В сети';st.className='prof-status on';}else{st.textContent='Был(а) '+fmtLastSeen(u.lastSeen);st.className='prof-status off';}
   const bioSec=document.getElementById('prof-bio-sec');
   if(u.bio){document.getElementById('prof-bio').textContent=u.bio;bioSec.style.display='block';}else bioSec.style.display='none';
-  const profActionsHtml=un!==ME?`<button class="btn pr" style="flex:1;min-width:0" onclick="startDMWith('${un}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Написать</button><button class="btn gh" style="flex:1;min-width:0" onclick="openGifts('${un}')">🎁 Подарить</button><button class="btn" style="flex:1;min-width:0;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#000;border:none;font-weight:700;border-radius:12px;padding:10px 8px;font-size:13px;cursor:pointer" onclick="transferCoins('${un}')">💸 Монеты</button>`:`<button class="btn gh" style="flex:1" onclick="openTasks()">🪙 Мои задания</button><button class="btn pr" style="flex:1" onclick="showMyGifts()">🎁 Мои подарки</button>`;
+  const profActionsHtml=un!==ME?`<button class="btn pr" style="flex:1;min-width:0" onclick="startDMWith('${un}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Написать</button><button class="btn gh" style="flex:1;min-width:0" onclick="openGifts('${un}')">🎁 Подарить</button><button class="btn" style="flex:1;min-width:0;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#000;border:none;font-weight:700;border-radius:12px;padding:10px 8px;font-size:13px;cursor:pointer" onclick="transferCoins('${un}')">💸 Монеты</button>`:`<button class="btn gh" style="flex:1" onclick="openTasks()">Мои задания</button><button class="btn pr" style="flex:1" onclick="showMyGifts()">🎁 Мои подарки</button>`;
   document.getElementById('prof-actions').innerHTML=profActionsHtml;
   // Load and show gifts — use token to cancel stale async results
   const _giftToken=un; // unique per user
@@ -2711,7 +2781,7 @@ window.transferCoins=function(toUser){
       <button onclick="document.getElementById('transfer-ov').remove()" style="background:var(--bg3);border:none;color:var(--text);width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
     </div>
     <div style="font-size:14px;color:var(--t2);margin-bottom:4px">Получатель: <b style="color:var(--text)">${esc(toName)}</b></div>
-    <div style="font-size:13px;color:var(--t3);margin-bottom:12px">Твой баланс: <b style="color:var(--accent)">${MY_COINS} 🪙</b></div>
+    <div style="font-size:13px;color:var(--t3);margin-bottom:12px">Твой баланс: <b style="color:var(--accent)">${MY_COINS} <svg viewBox="0 0 24 24" width="18" height="18" fill="#fbbf24" stroke="none" style="vertical-align:middle;flex-shrink:0"><circle cx="12" cy="12" r="10"/><text x="12" y="16" text-anchor="middle" font-size="11" font-weight="900" fill="#1a0a00">M</text></svg></b></div>
     <input id="tr-amt" type="number" min="1" placeholder="Введи сумму…"
       style="width:100%;background:var(--bg2);border:1.5px solid var(--border2);border-radius:12px;padding:12px 14px;font-size:17px;color:var(--text);outline:none;margin-bottom:10px;-webkit-appearance:none">
     <div style="display:flex;gap:8px;margin-bottom:14px">
@@ -2730,7 +2800,7 @@ window.doTransfer=async function(toUser){
   const inp=document.getElementById('tr-amt');
   const amount=parseInt(inp?.value||'0');
   if(!amount||amount<1){showToast('Введи сумму');return;}
-  if(amount>MY_COINS){showToast('Недостаточно монет 🪙');return;}
+  if(amount>MY_COINS){showToast('Недостаточно монет');return;}
   if(toUser===ME){showToast('Нельзя переводить себе 😅');return;}
   const toName=ALL_USERS[toUser]?.name||toUser;
   MY_COINS-=amount;
@@ -2742,7 +2812,7 @@ window.doTransfer=async function(toUser){
   const nr=push(ref(db,'notifications/'+toUser));
   await set(nr,{type:'coins_transfer',from:ME,fromName:ALL_USERS[ME]?.name||ME,amount,ts:Date.now(),read:false});
   document.getElementById('transfer-ov')?.remove();
-  showToast(`✅ Переведено ${amount} 🪙 → ${esc(toName)}`);
+  showToast('✅ Переведено '+amount+' Mycoins → '+esc(toName));
 };
 
 window.showMyGifts=function(){
@@ -2769,7 +2839,7 @@ window.showMyGifts=function(){
         info.innerHTML=`<div style="font-size:14px;font-weight:700;color:var(--text)">${esc(cat.name)}</div><div style="font-size:12px;color:var(--t3);margin-top:2px">От: ${esc(ALL_USERS[g.from]?.name||g.from)} · ${fmtTime(g.ts)}</div>`;
         const price=document.createElement('div');
         price.style.cssText='font-size:13px;font-weight:800;color:var(--accent);flex-shrink:0';
-        price.textContent=cat.price+'🪙';
+        price.innerHTML=cat.price+' '+'<svg viewBox="0 0 24 24" width="14" height="14" fill="#fbbf24" stroke="none" style="vertical-align:middle;flex-shrink:0"><circle cx="12" cy="12" r="10"/><text x="12" y="16" text-anchor="middle" font-size="11" font-weight="900" fill="#1a0a00">M</text></svg>';
         row.appendChild(iconWrap);row.appendChild(info);row.appendChild(price);
         body.appendChild(row);
       });
@@ -3287,7 +3357,7 @@ window.openTitleShop=function(){
       } else if(isOwned){
         priceEl.innerHTML='<span style="font-size:12px;color:var(--t3)">✓ В коллекции</span>';
       } else {
-        priceEl.innerHTML='<span style="font-size:16px;font-weight:900;color:'+(canAfford?'#fbbf24':'var(--t3)')+'">'+t.price.toLocaleString()+' 🪙</span>';
+        priceEl.innerHTML='<span style="font-size:16px;font-weight:900;color:'+(canAfford?'#fbbf24':'var(--t3)')+'">'+t.price.toLocaleString()+' <svg viewBox="0 0 24 24" width="14" height="14" fill="#fbbf24" stroke="none" style="vertical-align:middle;flex-shrink:0"><circle cx="12" cy="12" r="10"/><text x="12" y="16" text-anchor="middle" font-size="11" font-weight="900" fill="#1a0a00">M</text></svg></span>';
       }
       bottom.appendChild(priceEl);
 
@@ -3325,7 +3395,7 @@ window.openTitleShop=function(){
 
 window.buyTitle=async function(titleId){
   const t=getTitleById(titleId);if(!t||t.price<0)return;
-  if(MY_COINS<t.price){showToast('Недостаточно монет 🪙');return;}
+  if(MY_COINS<t.price){showToast('Недостаточно монет');return;}
   MY_COINS-=t.price;
   const owned=(ALL_USERS[ME]?.ownedTitles||'').split(',').filter(Boolean);
   owned.push(titleId);
@@ -3382,7 +3452,7 @@ window.claimTask=function(idx){
   const el=document.createElement('div');el.className='coin-fly';el.textContent='🪙';
   el.style.left=(window.innerWidth/2-14)+'px';el.style.top=(window.innerHeight/2)+'px';
   document.body.appendChild(el);setTimeout(()=>el.remove(),800);
-  showToast('+'+t.reward+' Mycoins! 🪙');
+  showToast('+'+t.reward+' Mycoins! ');
   renderTasks();
   // Sync to Firebase
   update(ref(db,'users/'+ME),{mycoins:MY_COINS}).catch(()=>{});
@@ -3405,7 +3475,7 @@ window.openGifts=function(targetUser){
     visWrap.className='gift-visual';visWrap.style.cssText=anim;
     visWrap.appendChild(makeGiftEl(g.id,68));
     const nm=document.createElement('div');nm.className='gift-name';nm.textContent=g.name;
-    const pr=document.createElement('div');pr.className='gift-price';pr.textContent=g.price+' 🪙';
+    const pr=document.createElement('div');pr.className='gift-price';pr.innerHTML=g.price+' '+'<svg viewBox="0 0 24 24" width="14" height="14" fill="#fbbf24" stroke="none" style="vertical-align:middle;flex-shrink:0"><circle cx="12" cy="12" r="10"/><text x="12" y="16" text-anchor="middle" font-size="11" font-weight="900" fill="#1a0a00">M</text></svg>';
     item.appendChild(visWrap);item.appendChild(nm);item.appendChild(pr);
     grid.appendChild(item);
   });
