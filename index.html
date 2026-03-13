@@ -3188,14 +3188,25 @@ let TASK_COUNTERS={msgs:0,reacts:0,photos:0,replies:0,videos:0,music:0,fwd:0};
 let giftTargetUser=null,selectedGiftId=null;
 
 function getTodayKey(){return new Date().toISOString().slice(0,10);}
-function loadCoins(){
+function loadCoins(cb){
+  // Tasks/counters — localStorage
   try{
     const d=JSON.parse(localStorage.getItem('myx_coins_'+ME)||'{}');
-    MY_COINS=d.coins||0;
     const tk=getTodayKey();
     if(d.taskDay===tk){DAILY_TASKS=d.tasks||[];TASK_COUNTERS=d.counters||TASK_COUNTERS;}
     else generateDailyTasks();
-  }catch{generateDailyTasks();}
+  }catch(e){generateDailyTasks();}
+  // Coins — всегда из Firebase
+  get(ref(db,'users/'+ME+'/mycoins')).then(snap=>{
+    MY_COINS=snap.exists()?Math.max(0,snap.val()||0):(ALL_USERS[ME]?.mycoins||0);
+    if(ALL_USERS[ME]) ALL_USERS[ME].mycoins=MY_COINS;
+    updateCoinsDisplay&&updateCoinsDisplay();
+    if(cb) cb();
+  }).catch(()=>{
+    MY_COINS=ALL_USERS[ME]?.mycoins||0;
+    updateCoinsDisplay&&updateCoinsDisplay();
+    if(cb) cb();
+  });
 }
 function saveCoins(){
   // Save only tasks/counters locally; coins are in Firebase
@@ -3220,10 +3231,11 @@ function incrementTask(type,amount=1){
   if(document.getElementById('s-tasks')&&!document.getElementById('s-tasks').classList.contains('hidden'))renderTasks();
 }
 function updateCoinsDisplay(){
-  const v=`${MY_COINS} Mycoins`;
-  const el=document.getElementById('s-coins-disp');if(el)el.querySelector('span').textContent=v;
+  const v=MY_COINS+' Mycoins';
+  const el=document.getElementById('s-coins-disp');if(el){const sp=el.querySelector('span');if(sp)sp.textContent=v;}
   const tc=document.getElementById('tasks-coins-val');if(tc)tc.textContent=MY_COINS;
   const gc=document.getElementById('gift-my-coins');if(gc)gc.textContent=v;
+  const ts=document.getElementById('ts-coins');if(ts)ts.textContent=MY_COINS+' Mycoins';
 }
 
 
@@ -3288,7 +3300,7 @@ function renderTitleBadge(titleId, small=false){
 }
 
 window.openTitleShop=function(){
-  loadCoins();
+  loadCoins(function(){
   const myTitleId=ALL_USERS[ME]?.titleId||null;
   const owned=(ALL_USERS[ME]?.ownedTitles||'').split(',').filter(Boolean);
   showScreen('s-titleshop');
@@ -3411,6 +3423,7 @@ window.openTitleShop=function(){
   const pad=document.createElement('div');
   pad.style.height='32px';
   body.appendChild(pad);
+  }); // end loadCoins callback
 };
 
 window.buyTitle=async function(titleId){
@@ -3481,7 +3494,7 @@ window.claimTask=function(idx){
 // Gift system
 window.openGifts=function(targetUser){
   giftTargetUser=targetUser;selectedGiftId=null;
-  loadCoins();updateCoinsDisplay();
+  loadCoins(function(){updateCoinsDisplay();});
   document.getElementById('gifts-title').textContent='Подарить: '+(ALL_USERS[targetUser]?.name||targetUser);
   const grid=document.getElementById('gift-grid');
   const sorted=[...GIFT_CATALOG].sort((a,b)=>a.price-b.price);
