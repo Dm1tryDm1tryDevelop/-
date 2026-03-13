@@ -2800,15 +2800,34 @@ window.doTransfer=async function(toUser){
   const inp=document.getElementById('tr-amt');
   const amount=parseInt(inp?.value||'0');
   if(!amount||amount<1){showToast('Введи сумму');return;}
-  if(amount>MY_COINS){showToast('Недостаточно монет');return;}
   if(toUser===ME){showToast('Нельзя переводить себе 😅');return;}
   const toName=ALL_USERS[toUser]?.name||toUser;
-  MY_COINS-=amount;
-  await update(ref(db,'users/'+ME),{mycoins:MY_COINS});
+  // Read BOTH balances fresh from Firebase before transfer
+  const [mySnap,theirSnap]=await Promise.all([
+    get(ref(db,'users/'+ME+'/mycoins')),
+    get(ref(db,'users/'+toUser+'/mycoins'))
+  ]);
+  const myActual=mySnap.val()||0;
+  const theirActual=theirSnap.val()||0;
+  if(amount>myActual){
+    MY_COINS=myActual;
+    updateCoinsDisplay&&updateCoinsDisplay();
+    showToast('Недостаточно монет');
+    return;
+  }
+  const newMy=myActual-amount;
+  const newTheir=theirActual+amount;
+  // Write both atomically
+  await Promise.all([
+    update(ref(db,'users/'+ME),{mycoins:newMy}),
+    update(ref(db,'users/'+toUser),{mycoins:newTheir})
+  ]);
+  // Update local state
+  MY_COINS=newMy;
+  if(ALL_USERS[ME]) ALL_USERS[ME].mycoins=newMy;
+  if(ALL_USERS[toUser]) ALL_USERS[toUser].mycoins=newTheir;
   updateCoinsDisplay&&updateCoinsDisplay();
-  const snap=await get(ref(db,'users/'+toUser+'/mycoins'));
-  const theirCoins=(snap.val()||0)+amount;
-  await update(ref(db,'users/'+toUser),{mycoins:theirCoins});
+  // Send notification to recipient
   const nr=push(ref(db,'notifications/'+toUser));
   await set(nr,{type:'coins_transfer',from:ME,fromName:ALL_USERS[ME]?.name||ME,amount,ts:Date.now(),read:false});
   document.getElementById('transfer-ov')?.remove();
@@ -3179,7 +3198,8 @@ function loadCoins(){
   }catch{generateDailyTasks();}
 }
 function saveCoins(){
-  localStorage.setItem('myx_coins_'+ME,JSON.stringify({coins:MY_COINS,taskDay:getTodayKey(),tasks:DAILY_TASKS,counters:TASK_COUNTERS}));
+  // Save only tasks/counters locally; coins are in Firebase
+  localStorage.setItem('myx_coins_'+ME,JSON.stringify({taskDay:getTodayKey(),tasks:DAILY_TASKS,counters:TASK_COUNTERS}));
 }
 function generateDailyTasks(){
   // Pick 5 tasks based on hash of username+date for personalization
