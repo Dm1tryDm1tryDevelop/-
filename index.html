@@ -1672,34 +1672,47 @@ function enterApp(){
 // PUSH NOTIFICATIONS (FCM Web Push)
 // ══════════════════════════════════════════════
 async function initPush(){
-  // Register service worker first
-  if(!('serviceWorker' in navigator)||!('PushManager' in window)){
-    console.log('Push not supported');return;
-  }
-  try{
-    const reg=await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-    console.log('SW registered');
-    // Request permission
-    const perm=await Notification.requestPermission();
-    if(perm!=='granted'){console.log('Push permission denied');return;}
-    // Get FCM token
-    const token=await getToken(messaging,{vapidKey:VAPID_KEY,serviceWorkerRegistration:reg});
-    if(!token){console.log('No FCM token');return;}
-    // Save token to Firebase under current user
-    await update(ref(db,'users/'+ME),{fcmToken:token,fcmUpdated:Date.now()});
-    console.log('FCM token saved ✓');
-    // Handle foreground messages (app is open)
-    onMessage(messaging,payload=>{
-      const n=payload.notification||{};
-      // If chat is NOT open or different chat — show in-app banner
-      const data=payload.data||{};
-      if(data.chatId&&data.chatId===curChatId)return; // already visible
-      showPushBanner(n.title||'MyMessend',n.body||'Новое сообщение',data.chatId,data.senderAvatar);
-    });
-  }catch(e){
-    console.warn('Push init error:',e);
-  }
+  if(!('Notification' in window)){return;}
+  Notification.requestPermission();
 }
+
+// Push notifications via direct Notification API + Firebase listener
+// pendingNotifs: {fromUser: {count, title, body, chatId, timer}}
+const _pendingNotifs={};
+
+function showPushNotif(chatId, fromName, text){
+  if(Notification.permission!=='granted') return;
+  if(document.visibilityState==='visible'&&curChatId===chatId) return;
+
+  const key=chatId+'_'+fromName;
+  if(!_pendingNotifs[key]){
+    _pendingNotifs[key]={count:0,chatId,fromName};
+  }
+  _pendingNotifs[key].count++;
+  const cnt=_pendingNotifs[key].count;
+  clearTimeout(_pendingNotifs[key].timer);
+
+  const title= cnt===1 ? fromName : fromName+' ('+cnt+' сообщений)';
+  const body  = cnt===1 ? text : 'Новых сообщений: '+cnt;
+
+  _pendingNotifs[key].timer=setTimeout(()=>{
+    if(Notification.permission!=='granted') return;
+    const n=new Notification(title,{
+      body,
+      icon:'https://dimagunchevskiy-oss.github.io/-/icon-192.png',
+      tag:key,
+      renotify:true,
+      silent:false
+    });
+    n.onclick=function(){
+      window.focus();
+      _pendingNotifs[key]={count:0,chatId,fromName};
+    };
+    // Reset counter after shown
+    setTimeout(()=>{ if(_pendingNotifs[key]) _pendingNotifs[key].count=0; },4000);
+  },300);
+}
+
 
 // In-app push banner (shows when app is open but different chat)
 function showPushBanner(title,body,chatId,avatar){
