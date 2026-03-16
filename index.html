@@ -984,7 +984,7 @@ input:-webkit-autofill{-webkit-box-shadow:0 0 0 100px var(--bg) inset!important;
     <input type="file" id="vid-pick" accept="video/*" style="display:none" onchange="sendVideoFile(this)">
     <input type="file" id="music-pick" accept="audio/*" style="display:none" onchange="sendMusicFile(this)">
     <div class="inprow">
-      <textarea class="msginp" id="msg-inp" rows="1" placeholder="Написать…" oninput="autoResize(this);onTypingEvt()" onkeydown="handleMsgKey(event)"></textarea>
+      <textarea class="msginp" id="msg-inp" rows="1" placeholder="Написать…" oninput="autoResize(this);(window.requestIdleCallback||setTimeout)(onTypingEvt,0)" onkeydown="handleMsgKey(event)"></textarea>
       <button class="attachbtn" onclick="toggleEmoji()" title="Эмодзи">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
       </button>
@@ -2495,14 +2495,14 @@ let lastTypingSend=0;
 window.onTypingEvt=function(){
   if(!curChatId||!ME)return;
   const now=Date.now();
-  // Throttle: send to Firebase max once per 2s
-  if(now-lastTypingSend>2000){
+  if(now-lastTypingSend>2500){
     lastTypingSend=now;
-    update(ref(db,`chats/${curChatId}/typing/${ME}`),{t:true,ts:now});
+    // Use setTimeout to not block the input thread
+    setTimeout(()=>update(ref(db,'chats/'+curChatId+'/typing/'+ME),{t:true,ts:Date.now()}),0);
   }
   clearTimeout(typingTimer);
   typingTimer=setTimeout(()=>{
-    if(curChatId&&ME){update(ref(db,`chats/${curChatId}/typing/${ME}`),{t:false,ts:0});lastTypingSend=0;}
+    if(curChatId&&ME){update(ref(db,'chats/'+curChatId+'/typing/'+ME),{t:false,ts:0});lastTypingSend=0;}
   },3000);
 };
 
@@ -3098,7 +3098,13 @@ window.openModal=function(id){document.getElementById(id).classList.add('on');pl
 window.closeModal=function(id){document.getElementById(id).classList.remove('on');};
 
 // ── INPUT ──────────────────────────────────────────────────────────
-window.autoResize=function(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';};
+window.autoResize=function(el){
+  const newH=Math.min(el.scrollHeight,120);
+  if(parseInt(el.style.height)!==newH){
+    el.style.height='auto';
+    el.style.height=newH+'px';
+  }
+};
 window.handleMsgKey=function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}};
 
 // ══════════════════════════════════════════════════════════════════
