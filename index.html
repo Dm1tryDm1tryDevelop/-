@@ -497,8 +497,7 @@ body{font-family:'Inter',sans-serif;color:var(--text);position:fixed;inset:0}
 .editbar .barname{color:var(--orange)}
 
 /* ═══ TYPING ═════════════════════════════════════ */
-.tbar{display:none;align-items:center;gap:8px;padding:5px 16px;background:var(--bg);flex-shrink:0}
-.tbar.on{display:flex}
+.tbar{display:none!important}
 .tdots{display:flex;gap:3px;align-items:center}
 .tdots span{width:6px;height:6px;background:var(--t3);border-radius:50%;
   animation:tdot 1.3s ease infinite}
@@ -1849,6 +1848,19 @@ function subscribeMessages(chatId){
       if(typers.length){ttxt.textContent=typers.join(', ')+(typers.length===1?' печатает…':' печатают…');tbar.classList.add('on');}
       else tbar.classList.remove('on');
     }
+    // Sync typing state to header status
+    const chStatus=document.getElementById('ch-status');
+    if(chStatus){
+      if(tbar.classList.contains('on')){
+        const txt=tbar.querySelector('.tname');
+        chStatus.innerHTML='<span style="color:var(--accent);font-size:12px">'+
+          (txt?txt.textContent:'')+'печатает…</span>';
+        chStatus._typing=true;
+      } else if(chStatus._typing){
+        chStatus._typing=false;
+        updateChatHeaderStatus&&updateChatHeaderStatus();
+      }
+    }
   });
 }
 
@@ -1993,6 +2005,20 @@ const DRAFTS={};
   },{passive:true});
 })();
 
+function updateChatHeaderStatus(){
+  const el=document.getElementById('ch-status');
+  if(!el||el._typing)return;
+  const chat=ALL_CHATS[curChatId];
+  if(!chat)return;
+  if(chat.type==='group'){
+    const cnt=Object.keys(chat.members||{}).length;
+    el.textContent=cnt+' участников';
+  } else {
+    const other=Object.keys(chat.members||{}).find(m=>m!==ME);
+    const u=other&&ALL_USERS[other];
+    el.textContent=u?.online?'в сети':u?.lastSeen?'был(а) '+fmtTime(u.lastSeen):'';
+  }
+}
 window.openChat=function(chatId){
   playClickSound();
   // Save current draft before switching
@@ -2410,8 +2436,10 @@ window.sendMessage=async function(){
   }
   const inp=document.getElementById('msg-inp');const text=inp.value.trim();
   if(!text&&!editMsgId)return;if(!curChatId)return;
-  inp.value='';inp.style.height='';document.getElementById('emoji-panel').style.display='none';
-  if(curChatId&&ME)update(ref(db,`chats/${curChatId}/typing/${ME}`),{t:false,ts:0});
+  if(inp.dataset.sending==='1')return; // block double send
+  inp.dataset.sending='1';
+  inp.value='';inp.style.height='auto';document.getElementById('emoji-panel').style.display='none';
+  if(curChatId&&ME)update(ref(db,'chats/'+curChatId+'/typing/'+ME),{t:false,ts:0});
   if(editMsgId){
     const eid=editMsgId;
     // Update local cache IMMEDIATELY so renderMessages picks it up
@@ -2437,6 +2465,7 @@ window.sendMessage=async function(){
   const unreadUpdates={};
   Object.keys(chatMembers).forEach(m=>{if(m!==ME)unreadUpdates[`chats/${curChatId}/unread/${m}`]={inc:true,ts:Date.now()};});
   await update(ref(db,'chats/'+curChatId),{lastMsg:text,lastMsgFrom:ME,lastMsgTime:Date.now()});
+  inp.dataset.sending='';
   cancelReply();scrollMsgs();playSendSound();
   incrementTask('msgs');
   if(replyTo)incrementTask('replies');// counted before cancel
